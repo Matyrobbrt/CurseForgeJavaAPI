@@ -28,13 +28,6 @@
 package io.github.matyrobbrt.curseforgeapi.schemas.file;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_FileModule")
-public record FileModule(String name, int fingerprint) {
-
-    public FileModule(WrappedJson j) {
-        this(j.getString("name"), j.getInt("fingerprint"));
-    }
-    
-}
+public record FileModule(String name, int fingerprint) {}

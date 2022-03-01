@@ -28,13 +28,6 @@
 package io.github.matyrobbrt.curseforgeapi.schemas.file;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_FileDependency")
-public record FileDependency(int modId, int fileId, FileRelationType relationType) {
-
-    public FileDependency(WrappedJson j) {
-        this(j.getInt("modId"), j.getInt("fileId"), FileRelationType.byId(j.getInt("relationType")));
-    }
-    
-}
+public record FileDependency(int modId, int fileId, FileRelationType relationType) {}

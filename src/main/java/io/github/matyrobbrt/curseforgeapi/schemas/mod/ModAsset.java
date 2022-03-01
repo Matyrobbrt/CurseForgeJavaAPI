@@ -29,15 +29,7 @@ package io.github.matyrobbrt.curseforgeapi.schemas.mod;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @ParametersAreNonnullByDefault
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_ModAsset")
-public record ModAsset(int id, int modId, String title, String description, String thumbnailUrl, String url) {
-
-    public ModAsset(WrappedJson j) {
-        this(j.getInt("id"), j.getInt("modId"), j.getString("title"), j.getString("description"),
-            j.getString("thumbnailUrl"), j.getString("url"));
-    }
-
-}
+public record ModAsset(int id, int modId, String title, String description, String thumbnailUrl, String url) {}

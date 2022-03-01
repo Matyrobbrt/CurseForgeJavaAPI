@@ -40,8 +40,6 @@ public record Game(int id, String name, String slug, String dateModified, Assets
     }
     
     @CurseForgeSchema("https://docs.curseforge.com/#schemagameassets")
-    public record Assets(String iconUrl, String tileUrl, String coverUrl) {
-
-    }
+    public record Assets(String iconUrl, String tileUrl, String coverUrl) {}
 
 }

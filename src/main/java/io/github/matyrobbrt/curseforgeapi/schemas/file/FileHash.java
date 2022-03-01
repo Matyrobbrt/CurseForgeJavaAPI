@@ -29,13 +29,6 @@ package io.github.matyrobbrt.curseforgeapi.schemas.file;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 import io.github.matyrobbrt.curseforgeapi.schemas.HashAlgo;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_FileHash")
-public record FileHash(String value, HashAlgo algo) {
-
-    public FileHash(WrappedJson j) {
-        this(j.getString("value"), HashAlgo.byId(j.getInt("algo")));
-    }
-    
-}
+public record FileHash(String value, HashAlgo algo) {}

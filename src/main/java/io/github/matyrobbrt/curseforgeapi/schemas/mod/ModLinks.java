@@ -29,14 +29,7 @@ package io.github.matyrobbrt.curseforgeapi.schemas.mod;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_ModLinks")
 public record ModLinks(@Nullable String websiteUrl, @Nullable String wikiUrl, @Nullable String issuesUrl,
-    @Nullable String sourceUrl) {
-
-    public ModLinks(WrappedJson j) {
-        this(j.getString("websiteUrl"), j.getString("wikiUrl"), j.getString("issuesUrl"), j.getString("sourceUrl"));
-    }
-
-}
+    @Nullable String sourceUrl) {}

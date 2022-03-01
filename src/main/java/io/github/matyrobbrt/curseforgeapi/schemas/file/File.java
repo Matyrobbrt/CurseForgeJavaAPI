@@ -29,12 +29,9 @@ package io.github.matyrobbrt.curseforgeapi.schemas.file;
 
 import java.util.List;
 
-import com.google.gson.JsonElement;
-
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.schemas.SortableGameVersion;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_File")
 public record File(int id, int gameId, int modId, boolean isAvailable, String displayName, String fileName,
@@ -42,17 +39,4 @@ public record File(int id, int gameId, int modId, boolean isAvailable, String di
     int downloadCount, String downloadUrl, List<String> gameVersions, List<SortableGameVersion> sortableGameVersions,
     List<FileDependency> dependencies, @Nullable Boolean exposeAsAlternative, @Nullable Integer parentProjectFileId,
     @Nullable Integer alternateFileId, @Nullable Boolean isServerPack, @Nullable Integer serverPackFileId,
-    int fileFingerprint, List<FileModule> modules) {
-    
-    public File(WrappedJson j) {
-        this(j.getInt("id"), j.getInt("gameId"), j.getInt("modId"), j.getBoolean("isAvailable"), j.getString("displayName"),
-            j.getString("fileName"), FileReleaseType.byId(j.getInt("releaseType")), FileStatus.byId(j.getInt("fileStatus")),
-            j.getListJsonObject("hashes", FileHash::new), j.getString("fileDate"), j.getInt("fileLength"),
-            j.getInt("downloadCount"), j.getString("downloadUrl"), j.getList("gameVersions", JsonElement::getAsString),
-            j.getListJsonObject("sortableGameVersions", SortableGameVersion::new),
-            j.getListJsonObject("dependencies", FileDependency::new), j.getBooleanNullable("exposeAsAlternative"),
-            j.getIntNullable("parentProjectFileId"), j.getIntNullable("alternateFileId"), j.getBooleanNullable("isServerPack"),
-            j.getIntNullable("serverPackFileId"), j.getInt("fileFingerprint"), j.getListJsonObject("modules", FileModule::new));
-    }
-
-}
+    int fileFingerprint, List<FileModule> modules) {}

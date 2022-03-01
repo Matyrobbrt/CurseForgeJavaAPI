@@ -73,7 +73,6 @@ import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModStatus;
 import io.github.matyrobbrt.curseforgeapi.schemas.Game.Assets;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 import io.github.matyrobbrt.curseforgeapi.util.Utils;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 import io.github.matyrobbrt.curseforgeapi.util.gson.CFSchemaEnumTypeAdapter;
 import io.github.matyrobbrt.curseforgeapi.util.gson.RecordDeserializer;
 

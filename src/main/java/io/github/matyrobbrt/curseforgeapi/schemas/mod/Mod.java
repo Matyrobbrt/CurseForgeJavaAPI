@@ -35,7 +35,6 @@ import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.schemas.Category;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.FileIndex;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @CurseForgeSchema("https://docs.curseforge.com/#schemamod")
 public record Mod(int id, int gameId, String name, String slug, ModLinks links, String summary, ModStatus status,
@@ -44,22 +43,10 @@ public record Mod(int id, int gameId, String name, String slug, ModLinks links, 
     List<File> latestFiles, List<FileIndex> latestFilesIndexes, String dateModified, String dateReleased,
     @Nullable Boolean allowModDistribution, int gamePopularityRank) {
 
-    public Mod(WrappedJson j) {
-        this(j.getInt("id"), j.getInt("gameId"), j.getString("name"), j.getString("slug"),
-            new ModLinks(j.getJsonObject("links")), j.getString("summary"), ModStatus.byId(j.getInt("status")),
-            j.getDouble("downloadCount"), j.getBoolean("isFeatured"), j.getInt("primaryCategoryId"),
-            j.getListJsonObject("categories", Category::new), j.getIntNullable("classId"),
-            j.getListJsonObject("authors", ModAuthor::new), new ModAsset(j.getJsonObject("logo")),
-            j.getListJsonObject("screenshots", ModAsset::new), j.getInt("mainFileId"),
-            j.getListJsonObject("latestFiles", File::new), j.getListJsonObject("latestFilesIndexes", FileIndex::new),
-            j.getString("dateModified"), j.getString("dateReleased"), j.getBooleanNullable("allowModDistribution"),
-            j.getInt("gamePopularityRank"));
-    }
-    
     public Instant getDateModifiedAsInstant() {
         return Instant.parse(dateModified);
     }
-    
+
     public Instant getDateReleasedAsInstant() {
         return Instant.parse(dateReleased);
     }

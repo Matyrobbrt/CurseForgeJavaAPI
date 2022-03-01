@@ -32,18 +32,11 @@ import java.time.Instant;
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_Category")
 @ParametersAreNonnullByDefault
 public record Category(int id, int gameId, String name, String slug, String url, String iconUrl, String dateModified,
     boolean isClass, @Nullable Integer classId, @Nullable Integer parentCategoryId) {
-    
-    public Category(WrappedJson j) {
-        this(j.getInt("id"), j.getInt("gameId"), j.getString("name"), j.getString("slug"), j.getString("url"),
-            j.getString("iconUrl"), j.getString("dateModified"), j.getBoolean("isClass"), j.getIntNullable("classId"), 
-            j.getIntNullable("parentCategoryId"));
-    }
     
     public Instant dateModifiedAsInstant() {
         return Instant.parse(dateModified);

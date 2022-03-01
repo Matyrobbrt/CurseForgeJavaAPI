@@ -30,14 +30,6 @@ package io.github.matyrobbrt.curseforgeapi.schemas.file;
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_FileIndex")
-public record FileIndex(String gameVersion, int fileId, String filename, FileReleaseType releaseType, @Nullable Integer gameVersionTypeId, @Nullable ModLoaderType modLoader) {
-
-    public FileIndex(WrappedJson j) {
-        this(j.getString("gameVersion"), j.getInt("fileId"), j.getString("filename"), FileReleaseType.byId(j.getInt("releaseType")),
-            j.getIntNullable("gameVersionTypeId"), j.getIntNullable("modLoader") == null ? null : ModLoaderType.byId(j.getInt("modLoader")));
-    }
-    
-}
+public record FileIndex(String gameVersion, int fileId, String filename, FileReleaseType releaseType, @Nullable Integer gameVersionTypeId, @Nullable ModLoaderType modLoader) {}

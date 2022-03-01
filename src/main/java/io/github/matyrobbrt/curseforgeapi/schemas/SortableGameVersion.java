@@ -29,15 +29,7 @@ package io.github.matyrobbrt.curseforgeapi.schemas;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_SortableGameVersion")
 public record SortableGameVersion(String gameVersionName, String gameVersionPadded, String gameVersion,
-    String gameVersionReleaseDate, @Nullable Integer gameVersionTypeId) {
-
-    public SortableGameVersion(WrappedJson j) {
-        this(j.getString("gameVersionName"), j.getString("gameVersionPadded"), j.getString("gameVersion"),
-            j.getString("gameVersionReleaseDate"), j.getIntNullable("gameVersionTypeId"));
-    }
-
-}
+    String gameVersionReleaseDate, @Nullable Integer gameVersionTypeId) {}

@@ -28,13 +28,6 @@
 package io.github.matyrobbrt.curseforgeapi.schemas.mod;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_ModAuthor")
-public record ModAuthor(int id, String name, String url) {
-
-    public ModAuthor(WrappedJson j) {
-        this(j.getInt("id"), j.getString("name"), j.getString("url"));
-    }
-    
-}
+public record ModAuthor(int id, String name, String url) {}
