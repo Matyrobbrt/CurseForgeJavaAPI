@@ -25,27 +25,4 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.schemas.mod;
-
-import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
-
-@CurseForgeSchema("https://docs.curseforge.com/#schemamodloadertype")
-public enum ModLoaderType {
-
-    ANY("Any"), FORGE("Forge"), CAULDRON("Cauldron"), LITE_LOADER("LiteLoader"), FABRIC("Fabric");
-
-    private final String name;
-
-    ModLoaderType(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String toString() {
-        return name;
-    }
-
-    public static ModLoaderType byId(int id) {
-        return values()[id - 1];
-    }
-}
+package io.github.matyrobbrt.curseforgeapi.request.objects;

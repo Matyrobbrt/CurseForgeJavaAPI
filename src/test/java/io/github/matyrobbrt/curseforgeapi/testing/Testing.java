@@ -27,25 +27,38 @@
 
 package io.github.matyrobbrt.curseforgeapi.testing;
 
+import org.junit.jupiter.api.Test;
+
+import static io.github.matyrobbrt.curseforgeapi.testing.TestUtils.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
+import io.github.matyrobbrt.curseforgeapi.request.Arguments;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
+import io.github.matyrobbrt.curseforgeapi.util.Constants.GameIDs;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 
 final class Testing {
 
     public static final String API_KEY = Dotenv.load().get("API_KEY");
-    
-    @org.junit.jupiter.api.Test
-    void test() {
+    public static final CurseForgeAPI CF_API = new CurseForgeAPI(API_KEY);
+
+    @Test
+    void searchResultsShouldBeValid() throws CurseForgeException {
+        final var optionalCategories = CF_API
+            .makeRequest(Requests.getCategories(Arguments.of("gameId", GameIDs.MINECRAFT)));
+        assertThat(optionalCategories).isPresent();
+        final var optCategory = optionalCategories.get().stream()
+            .filter(category -> "Armor, Tools, and Weapons".equals(category != null ? category.name() : null))
+            .findAny();
+        assertThat(optCategory).isPresent();
     }
-    
+
     public static void main(String[] args) throws CurseForgeException {
-        final var cfApi = new CurseForgeAPI(API_KEY);
-        cfApi.makeRequest(Requests.getMod(570544)).ifPresent(mod -> {
-            System.out.print(
-                cfApi.getGson().toJson(mod)
-            );
+    	CF_API.makeRequest(Requests.getCategories(Arguments.of("gameId", GameIDs.MINECRAFT)))
+        .ifPresent(categories -> {
+            System.out.println(categories);
         });
     }
 

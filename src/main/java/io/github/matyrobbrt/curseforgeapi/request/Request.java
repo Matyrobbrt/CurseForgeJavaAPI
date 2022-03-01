@@ -49,6 +49,9 @@ public class Request<R> extends GenericRequest {
         super(endpoint, method);
         this.responseDecoder = (g, j) -> {
             final var dataElement = j.get(responseObjectName);
+            if (dataElement.isJsonPrimitive()) {
+                return g.fromJson(dataElement.getAsJsonPrimitive(), type);
+            }
             return g.fromJson(dataElement.isJsonArray() ? dataElement.getAsJsonArray() : dataElement.getAsJsonObject(), type);
         };
     }

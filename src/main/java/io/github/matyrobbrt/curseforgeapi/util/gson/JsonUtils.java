@@ -25,27 +25,14 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.schemas.mod;
+package io.github.matyrobbrt.curseforgeapi.util.gson;
 
-import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
+import com.google.gson.JsonElement;
 
-@CurseForgeSchema("https://docs.curseforge.com/#schemamodloadertype")
-public enum ModLoaderType {
+public final class JsonUtils {
 
-    ANY("Any"), FORGE("Forge"), CAULDRON("Cauldron"), LITE_LOADER("LiteLoader"), FABRIC("Fabric");
-
-    private final String name;
-
-    ModLoaderType(String name) {
-        this.name = name;
+    public static boolean isString(final JsonElement element) {
+        return element != null && element.isJsonPrimitive() && element.getAsJsonPrimitive().isString();
     }
-
-    @Override
-    public String toString() {
-        return name;
-    }
-
-    public static ModLoaderType byId(int id) {
-        return values()[id - 1];
-    }
+    
 }

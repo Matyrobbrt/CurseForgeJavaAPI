@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -43,6 +46,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
 public class RecordDeserializer<R extends Record> implements JsonDeserializer<R> {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecordDeserializer.class);
     
     private final Supplier<Gson> gson;
     
@@ -63,13 +68,19 @@ public class RecordDeserializer<R extends Record> implements JsonDeserializer<R>
         final var jObj = json.getAsJsonObject();
         final var args = new ArrayList<>();
         for (final var f : fields) {
-            args.add(gson.fromJson(jObj.get(f.getName()), f.getType()));
+            var resultClazz = f.getType();
+            if (resultClazz == int.class) {
+                resultClazz = Integer.class;
+            } else if (resultClazz == boolean.class) {
+                resultClazz = Boolean.class;
+            }
+            args.add(resultClazz.cast(gson.fromJson(jObj.get(f.getName()), resultClazz)));
         }
         try {
             return constructor.newInstance(args.toArray(Object[]::new));
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
             | InvocationTargetException e) {
-            e.printStackTrace();
+            LOGGER.error("Encountered exception while deserializing record: ", e);
         }
         return null;
     }

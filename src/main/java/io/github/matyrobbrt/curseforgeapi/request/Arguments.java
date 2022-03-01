@@ -52,12 +52,14 @@ public class Arguments {
     }
 
     public Arguments put(String key, Object value) {
-        args.put(key, value.toString());
+        if (value != null) {
+            args.put(key, value.toString());
+        }
         return this;
     }
 
     public String build() {
-        return String.join("?", args.entrySet().stream().map(e -> "%s=%s".formatted(e.getKey(), e.getValue())).toArray(String[]::new));
+        return String.join("&", args.entrySet().stream().map(e -> "%s=%s".formatted(e.getKey(), e.getValue())).toArray(String[]::new));
     }
 
     @Override

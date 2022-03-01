@@ -29,7 +29,11 @@ dependencies {
 
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
     testImplementation group: 'io.github.cdimascio', name: 'dotenv-java', version: '2.2.3'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.22.0'
+    
+    def jupiterVersion = '5.8.2'
+    
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion
 }
 
 license {

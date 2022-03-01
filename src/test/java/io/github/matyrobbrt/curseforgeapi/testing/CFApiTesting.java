@@ -25,27 +25,22 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.schemas.mod;
+package io.github.matyrobbrt.curseforgeapi.testing;
 
-import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
+import org.junit.jupiter.api.Test;
 
-@CurseForgeSchema("https://docs.curseforge.com/#schemamodloadertype")
-public enum ModLoaderType {
+import io.github.matyrobbrt.curseforgeapi.request.Requests;
+import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 
-    ANY("Any"), FORGE("Forge"), CAULDRON("Cauldron"), LITE_LOADER("LiteLoader"), FABRIC("Fabric");
+import static io.github.matyrobbrt.curseforgeapi.testing.Testing.CF_API;
 
-    private final String name;
+import static org.assertj.core.api.Assertions.*;
 
-    ModLoaderType(String name) {
-        this.name = name;
+class CFApiTesting {
+
+    @Test
+    void test() throws CurseForgeException {
+        assertThat(CF_API.makeRequest(Requests.getGames(null)).toOptional()).isPresent();
     }
 
-    @Override
-    public String toString() {
-        return name;
-    }
-
-    public static ModLoaderType byId(int id) {
-        return values()[id - 1];
-    }
 }

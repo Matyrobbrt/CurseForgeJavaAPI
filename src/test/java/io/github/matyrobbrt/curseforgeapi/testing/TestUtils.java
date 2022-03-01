@@ -25,27 +25,17 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.schemas.mod;
+package io.github.matyrobbrt.curseforgeapi.testing;
 
-import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
+import org.assertj.core.api.AssertionsForClassTypes;
+import org.assertj.core.api.OptionalAssert;
 
-@CurseForgeSchema("https://docs.curseforge.com/#schemamodloadertype")
-public enum ModLoaderType {
+import io.github.matyrobbrt.curseforgeapi.request.Response;
 
-    ANY("Any"), FORGE("Forge"), CAULDRON("Cauldron"), LITE_LOADER("LiteLoader"), FABRIC("Fabric");
+public class TestUtils {
 
-    private final String name;
-
-    ModLoaderType(String name) {
-        this.name = name;
+    public static <VALUE> OptionalAssert<VALUE> assertThat(Response<VALUE> actual) {
+        return AssertionsForClassTypes.assertThat(actual.toOptional());
     }
 
-    @Override
-    public String toString() {
-        return name;
-    }
-
-    public static ModLoaderType byId(int id) {
-        return values()[id - 1];
-    }
 }
