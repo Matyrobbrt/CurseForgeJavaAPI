@@ -28,5 +28,5 @@
 package io.github.matyrobbrt.curseforgeapi.request;
 
 public enum Method {
-    GET;
+    GET, POST, PUT;
 }

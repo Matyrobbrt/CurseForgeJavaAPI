@@ -31,8 +31,11 @@ import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,12 +46,36 @@ import com.google.gson.JsonObject;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.Nonnull;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
+import io.github.matyrobbrt.curseforgeapi.request.AsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.GenericRequest;
-import io.github.matyrobbrt.curseforgeapi.request.Method;
 import io.github.matyrobbrt.curseforgeapi.request.Request;
+import io.github.matyrobbrt.curseforgeapi.request.Response;
+import io.github.matyrobbrt.curseforgeapi.schemas.ApiStatus;
+import io.github.matyrobbrt.curseforgeapi.schemas.Category;
+import io.github.matyrobbrt.curseforgeapi.schemas.Game;
+import io.github.matyrobbrt.curseforgeapi.schemas.HashAlgo;
+import io.github.matyrobbrt.curseforgeapi.schemas.SortableGameVersion;
+import io.github.matyrobbrt.curseforgeapi.schemas.Status;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.FileDependency;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.FileHash;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.FileIndex;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.FileModule;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.FileRelationType;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.FileReleaseType;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.FileStatus;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModAsset;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModAuthor;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLinks;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModStatus;
+import io.github.matyrobbrt.curseforgeapi.schemas.Game.Assets;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 import io.github.matyrobbrt.curseforgeapi.util.Utils;
 import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
+import io.github.matyrobbrt.curseforgeapi.util.gson.CFSchemaEnumTypeAdapter;
+import io.github.matyrobbrt.curseforgeapi.util.gson.RecordDeserializer;
 
 /**
  * The main class used for communicating with
@@ -67,14 +94,47 @@ public class CurseForgeAPI {
     private final HttpClient httpClient;
     private final Gson gson;
     private final Logger logger;
-    private int lastStatusCode;
 
+    //@formatter:off
     public CurseForgeAPI(final String apiKey) {
         this.apiKey = apiKey;
         this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
-        this.gson = new GsonBuilder().setPrettyPrinting().serializeNulls().disableHtmlEscaping().create();
+        
+        final var gsonBuilder = new GsonBuilder()
+            .setPrettyPrinting()
+            .serializeNulls()
+            .disableHtmlEscaping();
+        
+        class GsonRegisterHelper {
+            final List<Class<? extends Record>> records;
+            
+            @SafeVarargs
+            public GsonRegisterHelper(Class<? extends Record>... records) {
+                this.records = Arrays.asList(records);
+            }
+            
+            public void applyToBuilder(GsonBuilder builder) {
+                records.forEach(c -> builder.registerTypeAdapter(c, new RecordDeserializer<>(c, CurseForgeAPI.this::getGson)));
+            }
+        }
+        
+        final var gsonRegisterHelper = new GsonRegisterHelper(
+            Game.class, Assets.class, File.class, FileDependency.class, FileHash.class,
+            FileIndex.class, FileModule.class, Category.class, Mod.class, ModAsset.class,
+            ModAuthor.class, ModLinks.class, SortableGameVersion.class
+        );
+        gsonRegisterHelper.applyToBuilder(gsonBuilder);
+        
+        final List<Class<? extends Enum<?>>> cfSchemaEnums = List.of(
+            ApiStatus.class, FileRelationType.class, FileReleaseType.class, FileStatus.class,
+            ModLoaderType.class, HashAlgo.class, Status.class, ModStatus.class
+        );
+        cfSchemaEnums.forEach(e -> gsonBuilder.registerTypeAdapter(e, CFSchemaEnumTypeAdapter.constructUnsafe(e)));
+        
+        this.gson = gsonBuilder.create();
         this.logger = LoggerFactory.getLogger(getClass());
     }
+    //@formatter:on
 
     public CurseForgeAPI(final String apiKey, final HttpClient httpClient, final Gson gson, final Logger logger) {
         this.apiKey = apiKey;
@@ -82,52 +142,119 @@ public class CurseForgeAPI {
         this.gson = gson;
         this.logger = logger;
     }
-
-    /**
-     * Sends a request to the API
-     * 
-     * @param  <R>                 the type of the request result
-     * @param  request             the request to send
-     * @return                     the result of the request, deserialized from a
-     *                             {@link JsonObject} using
-     *                             {@link Request#decodeResponse(WrappedJson)}.
-     * @throws CurseForgeException
-     */
-    public <R> R makeRequest(Request<? extends R> request) throws CurseForgeException {
-        final var resJson = makeGenericRequest(request);
-        if (resJson == null) { return null; }
-        return request.decodeResponse(new WrappedJson(resJson));
+    
+    public Gson getGson() {
+        return gson;
+    }
+    
+    public Logger getLogger() {
+        return logger;
+    }
+    
+    public HttpClient getHttpClient() {
+        return httpClient;
+    }
+    
+    public String getApiKey() {
+        return apiKey;
     }
 
     /**
-     * Sends a generic request to the API.
+     * Sends a <b>blocking</b> request to the API
+     * 
+     * @param  <R>                 the type of the request result
+     * @param  request             the request to send
+     * @return                     the response of the request, deserialized from a
+     *                             {@link JsonObject} using
+     *                             {@link Request#decodeResponse(WrappedJson)}, if
+     *                             present
+     * @throws CurseForgeException
+     */
+    public <R> Response<R> makeRequest(Request<? extends R> request) throws CurseForgeException {
+        return makeGenericRequest(request).map(j -> request.decodeResponse(getGson(), j));
+    }
+
+    /**
+     * Sends a generic <b>blocking</b> request to the API.
      * 
      * @param  genericRequest      the request to send
-     * @return                     the result of the request
+     * @return                     the response of the request
      * @throws CurseForgeException
      */
     @Nonnull
-    public JsonObject makeGenericRequest(GenericRequest genericRequest) throws CurseForgeException {
+    public Response<JsonObject> makeGenericRequest(GenericRequest genericRequest) throws CurseForgeException {
+        int statusCode = 0;
         try {
             final URL target = new URL(REQUEST_TARGET + genericRequest.endpoint());
             final var httpRequest = Utils.<HttpRequest.Builder>makeWithSupplier(() -> {
                 var r = HttpRequest.newBuilder(URI.create(target.toString())).header("Accept", "application/json")
                     .header("x-api-key", apiKey);
-                if (genericRequest.method() == Method.GET) {
-                    r = r.GET();
-                }
+                r = switch (genericRequest.method()) {
+                case GET -> r.GET();
+                case POST -> r.POST(BodyPublishers.ofString(genericRequest.body().toString()));
+                case PUT -> r.PUT(BodyPublishers.ofString(genericRequest.body().toString()));
+                };
                 return r;
             }).build();
             final var response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            lastStatusCode = response.statusCode();
-            return gson.fromJson(response.body(), JsonObject.class);
+            statusCode = response.statusCode();
+            return Response.ofNullable(gson.fromJson(response.body(), JsonObject.class), statusCode);
         } catch (InterruptedException ine) {
-            logger.info("The last status code was: " + lastStatusCode);
-            logger.error("InterruptedException while awaiting CurseForge response: ", ine);
+            logger.error(
+                "InterruptedException while awaiting CurseForge response, which returned with the status code: ", ine);
             Thread.currentThread().interrupt();
-            return new JsonObject();
+            return Response.empty(statusCode);
         } catch (Exception e) {
-            logger.info("The last status code was: " + lastStatusCode);
+            logger.info("Status code was {}", statusCode);
+            throw new CurseForgeException(e);
+        }
+    }
+
+    // Async
+
+    /**
+     * Sends an <b>async</b> request to the API
+     * 
+     * @param  <R>                 the type of the request result
+     * @param  request             the request to send
+     * @return                     the async request, which will be sent when
+     *                             {@link AsyncRequest#queue} is called. The result
+     *                             is deserialized from a {@link JsonObject} using
+     *                             {@link Request#decodeResponse(WrappedJson)}, if
+     *                             present
+     * @throws CurseForgeException
+     */
+    public <R> AsyncRequest<Response<R>> makeAsyncRequest(Request<? extends R> request) throws CurseForgeException {
+        return makeAsyncGenericRequest(request).map(r -> r.map(j -> request.decodeResponse(getGson(), j)));
+    }
+
+    /**
+     * Sends an <b>async</b> generic request to the API.
+     * 
+     * @param  genericRequest      the request to send
+     * @return                     the async request, which will be sent when
+     *                             {@link AsyncRequest#queue} is called.
+     * @throws CurseForgeException
+     */
+    @Nonnull
+    public AsyncRequest<Response<JsonObject>> makeAsyncGenericRequest(GenericRequest genericRequest)
+        throws CurseForgeException {
+        try {
+            final URL target = new URL(REQUEST_TARGET + genericRequest.endpoint());
+            final var httpRequest = Utils.<HttpRequest.Builder>makeWithSupplier(() -> {
+                var r = HttpRequest.newBuilder(URI.create(target.toString())).header("Accept", "application/json")
+                    .header("x-api-key", apiKey);
+                r = switch (genericRequest.method()) {
+                case GET -> r.GET();
+                case POST -> r.POST(BodyPublishers.ofString(genericRequest.body().toString()));
+                case PUT -> r.PUT(BodyPublishers.ofString(genericRequest.body().toString()));
+                };
+                return r;
+            }).build();
+            return new AsyncRequest<>(() -> httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> Response.ofNullable(gson.fromJson(response.body(), JsonObject.class),
+                    response.statusCode())));
+        } catch (Exception e) {
             throw new CurseForgeException(e);
         }
     }

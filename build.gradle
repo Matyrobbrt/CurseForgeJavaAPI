@@ -1,9 +1,15 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0"
+    }
+}
 plugins {
     id 'java-library'
     id 'org.cadixdev.licenser' version '0.6.1'
     id 'eclipse'
-    id 'maven-publish'
-    id 'signing'
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -45,15 +51,13 @@ java {
 allprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
+    apply plugin: 'io.codearte.nexus-staging'
     publishing {
         publications{
             mavenJava(MavenPublication) {
                 from components.java
-                artifactId = archivesBaseName
-                groupId = group
                 pom {
-                    name = "${name}"
-                    description = "${description}"
+                    description = "A Java wrapper for the CurseForge API"
                     url = 'https://github.com/Matyrobbrt/CurseForgeJavaAPI'
                     licenses {
                         license {
@@ -79,7 +83,9 @@ allprojects {
         repositories {
             maven {
                 name = "OSSRH"
-                url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                url = project.hasProperty("snapshot") ?
+                        "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                        : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
                 credentials {
                     username = ossrhUser
                     password = ossrhPassword
@@ -89,6 +95,14 @@ allprojects {
     }
     signing {
         sign publishing.publications.mavenJava
+    }
+    nexusStaging {
+        serverUrl = "https://s01.oss.sonatype.org/service/local/"
+        username = ossrhUser
+        password = ossrhPassword
+    }
+    if (project.hasProperty("close")) {
+        tasks.publish.finalizedBy closeAndReleaseRepository
     }
 }
 

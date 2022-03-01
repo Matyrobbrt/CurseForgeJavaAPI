@@ -27,13 +27,21 @@
 
 package io.github.matyrobbrt.curseforgeapi.request;
 
+import com.google.gson.JsonElement;
+
 public class GenericRequest {
     private final String endpoint;
     private final Method method;
+    private final JsonElement body;
     
     public GenericRequest(String endpoint, Method method) {
+        this(endpoint, method, null);
+    }
+    
+    public GenericRequest(String endpoint, Method method, JsonElement body) {
         this.endpoint = endpoint;
         this.method = method;
+        this.body = body;
     }
 
     public Method method() {
@@ -42,5 +50,9 @@ public class GenericRequest {
 
     public String endpoint() {
         return endpoint;
+    }
+
+    public JsonElement body() {
+        return body;
     }
 }

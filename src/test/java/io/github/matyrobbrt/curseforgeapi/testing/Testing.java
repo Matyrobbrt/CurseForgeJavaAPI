@@ -27,11 +27,8 @@
 
 package io.github.matyrobbrt.curseforgeapi.testing;
 
-import com.google.gson.GsonBuilder;
-
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
-import io.github.matyrobbrt.curseforgeapi.request.Arguments;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 
@@ -45,10 +42,11 @@ final class Testing {
     
     public static void main(String[] args) throws CurseForgeException {
         final var cfApi = new CurseForgeAPI(API_KEY);
-        System.out.println(
-            new GsonBuilder().setPrettyPrinting().create()
-                .toJson(cfApi.makeRequest(Requests.getGames(Arguments.of("index", "6"))))
-        );
+        cfApi.makeRequest(Requests.getMod(570544)).ifPresent(mod -> {
+            System.out.print(
+                cfApi.getGson().toJson(mod)
+            );
+        });
     }
 
 }

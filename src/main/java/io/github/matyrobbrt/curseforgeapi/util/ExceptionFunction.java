@@ -25,36 +25,25 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.request;
+package io.github.matyrobbrt.curseforgeapi.util;
 
-import java.lang.reflect.Type;
-import java.util.function.BiFunction;
+/**
+ * Represents a function that accepts one argument and produces a result, with
+ * the chance of throwing an exception.
+ *
+ * @param <T> the type of the input to the function
+ * @param <R> the type of the result of the function
+ * @param <E> the type of the exception thrown by the function
+ */
+@FunctionalInterface
+public interface ExceptionFunction<T, R, E extends Exception> {
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
-import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
-
-@ParametersAreNonnullByDefault
-public class Request<R> extends GenericRequest {
-
-    private final BiFunction<Gson, JsonObject, R> responseDecoder;
-
-    public Request(String endpoint, Method method, BiFunction<Gson, JsonObject, R> responseDecoder) {
-        super(endpoint, method);
-        this.responseDecoder = responseDecoder;
-    }
+    /**
+     * Applies this function to the given argument.
+     *
+     * @param t the function argument
+     * @return the function result
+     */
+    R apply(T t) throws E;
     
-    public Request(String endpoint, Method method, String responseObjectName, Type type) {
-        super(endpoint, method);
-        this.responseDecoder = (g, j) -> {
-            final var dataElement = j.get(responseObjectName);
-            return g.fromJson(dataElement.isJsonArray() ? dataElement.getAsJsonArray() : dataElement.getAsJsonObject(), type);
-        };
-    }
-
-    public R decodeResponse(Gson gson, JsonObject response) {
-        return responseDecoder.apply(gson, response);
-    }
-
 }

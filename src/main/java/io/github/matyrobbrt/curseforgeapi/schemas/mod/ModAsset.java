@@ -25,36 +25,19 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.request;
+package io.github.matyrobbrt.curseforgeapi.schemas.mod;
 
-import java.lang.reflect.Type;
-import java.util.function.BiFunction;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
+import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
+import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
 @ParametersAreNonnullByDefault
-public class Request<R> extends GenericRequest {
+@CurseForgeSchema("https://docs.curseforge.com/#tocS_ModAsset")
+public record ModAsset(int id, int modId, String title, String description, String thumbnailUrl, String url) {
 
-    private final BiFunction<Gson, JsonObject, R> responseDecoder;
-
-    public Request(String endpoint, Method method, BiFunction<Gson, JsonObject, R> responseDecoder) {
-        super(endpoint, method);
-        this.responseDecoder = responseDecoder;
-    }
-    
-    public Request(String endpoint, Method method, String responseObjectName, Type type) {
-        super(endpoint, method);
-        this.responseDecoder = (g, j) -> {
-            final var dataElement = j.get(responseObjectName);
-            return g.fromJson(dataElement.isJsonArray() ? dataElement.getAsJsonArray() : dataElement.getAsJsonObject(), type);
-        };
-    }
-
-    public R decodeResponse(Gson gson, JsonObject response) {
-        return responseDecoder.apply(gson, response);
+    public ModAsset(WrappedJson j) {
+        this(j.getInt("id"), j.getInt("modId"), j.getString("title"), j.getString("description"),
+            j.getString("thumbnailUrl"), j.getString("url"));
     }
 
 }

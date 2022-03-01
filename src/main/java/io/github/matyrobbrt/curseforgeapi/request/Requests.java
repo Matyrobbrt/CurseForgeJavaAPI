@@ -27,13 +27,18 @@
 
 package io.github.matyrobbrt.curseforgeapi.request;
 
+import java.lang.reflect.Type;
 import java.util.List;
+
+import com.google.gson.reflect.TypeToken;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.AcceptsArgs;
 import io.github.matyrobbrt.curseforgeapi.annotation.Arg;
-import io.github.matyrobbrt.curseforgeapi.annotation.Arg.Type;
-import io.github.matyrobbrt.curseforgeapi.schemas.Category;
+import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
 import io.github.matyrobbrt.curseforgeapi.schemas.Game;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
+
+import static io.github.matyrobbrt.curseforgeapi.annotation.Arg.Type.*;
 
 /**
  * A utility class that contains methods for creating common requests. Please
@@ -43,28 +48,28 @@ import io.github.matyrobbrt.curseforgeapi.schemas.Game;
  * @author matyrobbrt
  *
  */
+@ParametersAreNonnullByDefault
 public final class Requests {
 
-    public static Request<List<Category>> getCategories(int gameId) {
-        return new Request<>("/v1/categories?gameId=%s".formatted(gameId), Method.GET,
-            j -> j.getListJsonObject("data", Category::new));
-    }
-
-    public static Request<List<Category>> getCategories(int gameId, int classId) {
-        return new Request<>("/v1/categories?gameId=%s?classId=%s".formatted(gameId, classId), Method.GET,
-            j -> j.getListJsonObject("data", Category::new));
-    }
-
     @AcceptsArgs({
-        @Arg(name = "index", description = "A zero based index of the first item to include in the response.", type = Type.INTEGER),
-        @Arg(name = "pageSize", description = "The number of items to include in the response", type = Type.INTEGER)
+        @Arg(name = "index", description = "A zero based index of the first item to include in the response.", type = INTEGER),
+        @Arg(name = "pageSize", description = "The number of items to include in the response", type = INTEGER)
     })
     public static Request<List<Game>> getGames(Arguments args) {
-        return new Request<>(format("/v1/games", args), Method.GET, j -> j.getListJsonObject("data", Game::new));
+        return new Request<>(format("/v1/games", args), Method.GET, "data", Types.GAME_LIST);
+    }
+    
+    public static Request<Mod> getMod(int modId) {
+        return new Request<>("/v1/mods/" + modId, Method.GET, "data", Types.MOD);
     }
 
     public static String format(String str, Arguments args) {
-        return str + args.build();
+        return str + "?" + args.build();
     }
 
+    //@formatter:off
+    public static final class Types {
+        public static final Type GAME_LIST = new TypeToken<List<Game>>() {}.getType();
+        public static final Type MOD = new TypeToken<Mod>() {}.getType();
+    }
 }

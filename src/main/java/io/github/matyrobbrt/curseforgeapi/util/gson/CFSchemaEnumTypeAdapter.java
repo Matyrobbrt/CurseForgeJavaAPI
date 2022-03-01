@@ -25,36 +25,35 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.request;
+package io.github.matyrobbrt.curseforgeapi.util.gson;
 
-import java.lang.reflect.Type;
-import java.util.function.BiFunction;
+import java.io.IOException;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
-import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
-
-@ParametersAreNonnullByDefault
-public class Request<R> extends GenericRequest {
-
-    private final BiFunction<Gson, JsonObject, R> responseDecoder;
-
-    public Request(String endpoint, Method method, BiFunction<Gson, JsonObject, R> responseDecoder) {
-        super(endpoint, method);
-        this.responseDecoder = responseDecoder;
+public class CFSchemaEnumTypeAdapter<E extends Enum<E>> extends TypeAdapter<E> {
+    
+    @SuppressWarnings("unchecked")
+    public static <E extends Enum<E>> CFSchemaEnumTypeAdapter<E> constructUnsafe(Class<?> clazz) {
+        return new CFSchemaEnumTypeAdapter<>((Class<E>) clazz);
     }
     
-    public Request(String endpoint, Method method, String responseObjectName, Type type) {
-        super(endpoint, method);
-        this.responseDecoder = (g, j) -> {
-            final var dataElement = j.get(responseObjectName);
-            return g.fromJson(dataElement.isJsonArray() ? dataElement.getAsJsonArray() : dataElement.getAsJsonObject(), type);
-        };
+    private final Class<E> clazz;
+    
+    public CFSchemaEnumTypeAdapter(Class<E> clazz) {
+        this.clazz = clazz;
     }
 
-    public R decodeResponse(Gson gson, JsonObject response) {
-        return responseDecoder.apply(gson, response);
+    @Override
+    public void write(JsonWriter out, E value) throws IOException {
+        out.value(value.ordinal() + 1);
+    }
+
+    @Override
+    public E read(JsonReader in) throws IOException {
+        return clazz.getEnumConstants()[in.nextInt() - 1];
     }
 
 }

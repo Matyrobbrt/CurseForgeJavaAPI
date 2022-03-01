@@ -29,10 +29,12 @@ package io.github.matyrobbrt.curseforgeapi.schemas;
 
 import java.time.Instant;
 
+import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
 import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
 
+@CurseForgeSchema("https://docs.curseforge.com/#tocS_Category")
 @ParametersAreNonnullByDefault
 public record Category(int id, int gameId, String name, String slug, String url, String iconUrl, String dateModified,
     boolean isClass, @Nullable Integer classId, @Nullable Integer parentCategoryId) {

@@ -33,12 +33,19 @@ import java.util.function.Function;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
+
 public record WrappedJson(JsonObject json) {
 
     public int getInt(String name) {
         return json.get(name).getAsInt();
     }
     
+    public double getDouble(String name) {
+        return json.get(name).getAsDouble();
+    }
+
+    @Nullable
     public Integer getIntNullable(String name) {
         if (json.get(name) == null) {
             return null;
@@ -50,6 +57,14 @@ public record WrappedJson(JsonObject json) {
         return json.get(name).isJsonPrimitive()
             ? json.get(name).getAsString()
             : null;
+    }
+    
+    @Nullable
+    public Boolean getBooleanNullable(String name) {
+        if (json.get(name) == null) {
+            return null;
+        }
+        return json.get(name).getAsBoolean();
     }
 
     public boolean getBoolean(String name) {

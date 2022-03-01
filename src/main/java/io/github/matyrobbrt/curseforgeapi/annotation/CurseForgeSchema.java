@@ -25,36 +25,28 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.request;
+package io.github.matyrobbrt.curseforgeapi.annotation;
 
-import java.lang.reflect.Type;
-import java.util.function.BiFunction;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
+/**
+ * Classes annotated with this annotation are schemas for use with the CurseForg
+ * API. <br>
+ * <strong>This annotation is PURELY visual.</strong>
+ */
+@Documented
+@Retention(SOURCE)
+@Target(TYPE)
+public @interface CurseForgeSchema {
 
-@ParametersAreNonnullByDefault
-public class Request<R> extends GenericRequest {
-
-    private final BiFunction<Gson, JsonObject, R> responseDecoder;
-
-    public Request(String endpoint, Method method, BiFunction<Gson, JsonObject, R> responseDecoder) {
-        super(endpoint, method);
-        this.responseDecoder = responseDecoder;
-    }
+    /**
+     * @return the page in the CurseForge docs which talks about this schema
+     */
+    String value();
     
-    public Request(String endpoint, Method method, String responseObjectName, Type type) {
-        super(endpoint, method);
-        this.responseDecoder = (g, j) -> {
-            final var dataElement = j.get(responseObjectName);
-            return g.fromJson(dataElement.isJsonArray() ? dataElement.getAsJsonArray() : dataElement.getAsJsonObject(), type);
-        };
-    }
-
-    public R decodeResponse(Gson gson, JsonObject response) {
-        return responseDecoder.apply(gson, response);
-    }
-
 }

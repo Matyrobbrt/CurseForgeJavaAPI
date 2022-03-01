@@ -27,6 +27,9 @@
 
 package io.github.matyrobbrt.curseforgeapi.request;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A list of keys and values for specifying arguments when send a request to
  * CurseForge.
@@ -34,30 +37,50 @@ package io.github.matyrobbrt.curseforgeapi.request;
  * @author matyrobbrt
  *
  */
-public final class Arguments {
+public class Arguments {
 
-    public static final Arguments EMPTY = new Arguments("");
+    public static final Arguments EMPTY = new Arguments(new HashMap<>()).immutable();
 
     public static Arguments of(String key, Object value) {
-        return new Arguments("").put(key, value);
+        return new Arguments(new HashMap<>()).put(key, value);
     }
 
-    private final String args;
+    final Map<String, String> args;
 
-    private Arguments(String args) {
+    Arguments(Map<String, String> args) {
         this.args = args;
     }
 
     public Arguments put(String key, Object value) {
-        return new Arguments("%s?%s=%s".formatted(args, key, value));
+        args.put(key, value.toString());
+        return this;
     }
 
     public String build() {
-        return args;
+        return String.join("?", args.entrySet().stream().map(e -> "%s=%s".formatted(e.getKey(), e.getValue())).toArray(String[]::new));
     }
 
     @Override
     public String toString() {
         return build();
+    }
+    
+    public Arguments immutable() {
+        return new Immutable(args);
+    }
+    
+    private static final class Immutable extends Arguments {
+
+        Immutable(Map<String, String> args) {
+            super(Map.copyOf(args));
+        }
+        
+        @Override
+        public Arguments put(String key, Object value) {
+            final var newArgs = new HashMap<>(args);
+            newArgs.put(key, value.toString());
+            return new Arguments(newArgs);
+        }
+        
     }
 }

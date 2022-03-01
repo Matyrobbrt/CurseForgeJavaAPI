@@ -25,36 +25,5 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.request;
-
-import java.lang.reflect.Type;
-import java.util.function.BiFunction;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
-import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
-
-@ParametersAreNonnullByDefault
-public class Request<R> extends GenericRequest {
-
-    private final BiFunction<Gson, JsonObject, R> responseDecoder;
-
-    public Request(String endpoint, Method method, BiFunction<Gson, JsonObject, R> responseDecoder) {
-        super(endpoint, method);
-        this.responseDecoder = responseDecoder;
-    }
-    
-    public Request(String endpoint, Method method, String responseObjectName, Type type) {
-        super(endpoint, method);
-        this.responseDecoder = (g, j) -> {
-            final var dataElement = j.get(responseObjectName);
-            return g.fromJson(dataElement.isJsonArray() ? dataElement.getAsJsonArray() : dataElement.getAsJsonObject(), type);
-        };
-    }
-
-    public R decodeResponse(Gson gson, JsonObject response) {
-        return responseDecoder.apply(gson, response);
-    }
-
-}
+@io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault
+package io.github.matyrobbrt.curseforgeapi.schemas.file;

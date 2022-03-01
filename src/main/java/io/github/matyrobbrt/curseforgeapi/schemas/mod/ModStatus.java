@@ -25,36 +25,16 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.request;
+package io.github.matyrobbrt.curseforgeapi.schemas.mod;
 
-import java.lang.reflect.Type;
-import java.util.function.BiFunction;
+import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+@CurseForgeSchema("https://docs.curseforge.com/#schemamodstatus")
+public enum ModStatus {
 
-import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
-
-@ParametersAreNonnullByDefault
-public class Request<R> extends GenericRequest {
-
-    private final BiFunction<Gson, JsonObject, R> responseDecoder;
-
-    public Request(String endpoint, Method method, BiFunction<Gson, JsonObject, R> responseDecoder) {
-        super(endpoint, method);
-        this.responseDecoder = responseDecoder;
-    }
+    NEW, CHANGES_REQUIRED, UNDER_SOFT_REVIEW, APPROVED, REJECTED, CHANGES_MADE, INACTIVE, ABANDONED, DELETED, UNDER_REVIEW;
     
-    public Request(String endpoint, Method method, String responseObjectName, Type type) {
-        super(endpoint, method);
-        this.responseDecoder = (g, j) -> {
-            final var dataElement = j.get(responseObjectName);
-            return g.fromJson(dataElement.isJsonArray() ? dataElement.getAsJsonArray() : dataElement.getAsJsonObject(), type);
-        };
+    public static ModStatus byId(int id) {
+        return values()[id - 1];
     }
-
-    public R decodeResponse(Gson gson, JsonObject response) {
-        return responseDecoder.apply(gson, response);
-    }
-
 }

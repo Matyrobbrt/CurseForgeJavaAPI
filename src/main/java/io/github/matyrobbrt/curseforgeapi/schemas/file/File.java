@@ -1,0 +1,58 @@
+/*
+ * This file is part of the CurseForge Java API library and is licensed under
+ * the MIT license:
+ *
+ * MIT License
+ *
+ * Copyright (c) 2022 Matyrobbrt
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package io.github.matyrobbrt.curseforgeapi.schemas.file;
+
+import java.util.List;
+
+import com.google.gson.JsonElement;
+
+import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
+import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
+import io.github.matyrobbrt.curseforgeapi.schemas.SortableGameVersion;
+import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
+
+@CurseForgeSchema("https://docs.curseforge.com/#tocS_File")
+public record File(int id, int gameId, int modId, boolean isAvailable, String displayName, String fileName,
+    FileReleaseType releaseType, FileStatus fileStatus, List<FileHash> hashes, String fileDate, int fileLength,
+    int downloadCount, String downloadUrl, List<String> gameVersions, List<SortableGameVersion> sortableGameVersions,
+    List<FileDependency> dependencies, @Nullable Boolean exposeAsAlternative, @Nullable Integer parentProjectFileId,
+    @Nullable Integer alternateFileId, @Nullable Boolean isServerPack, @Nullable Integer serverPackFileId,
+    int fileFingerprint, List<FileModule> modules) {
+    
+    public File(WrappedJson j) {
+        this(j.getInt("id"), j.getInt("gameId"), j.getInt("modId"), j.getBoolean("isAvailable"), j.getString("displayName"),
+            j.getString("fileName"), FileReleaseType.byId(j.getInt("releaseType")), FileStatus.byId(j.getInt("fileStatus")),
+            j.getListJsonObject("hashes", FileHash::new), j.getString("fileDate"), j.getInt("fileLength"),
+            j.getInt("downloadCount"), j.getString("downloadUrl"), j.getList("gameVersions", JsonElement::getAsString),
+            j.getListJsonObject("sortableGameVersions", SortableGameVersion::new),
+            j.getListJsonObject("dependencies", FileDependency::new), j.getBooleanNullable("exposeAsAlternative"),
+            j.getIntNullable("parentProjectFileId"), j.getIntNullable("alternateFileId"), j.getBooleanNullable("isServerPack"),
+            j.getIntNullable("serverPackFileId"), j.getInt("fileFingerprint"), j.getListJsonObject("modules", FileModule::new));
+    }
+
+}

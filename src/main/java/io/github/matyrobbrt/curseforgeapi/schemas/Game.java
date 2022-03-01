@@ -29,25 +29,18 @@ package io.github.matyrobbrt.curseforgeapi.schemas;
 
 import java.time.Instant;
 
-import io.github.matyrobbrt.curseforgeapi.util.WrappedJson;
+import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 
-public record Game(int id, String name, String slug, String dateModified, Assets asstes, Status status,
+@CurseForgeSchema("https://docs.curseforge.com/#tocS_Game")
+public record Game(int id, String name, String slug, String dateModified, Assets assets, Status status,
     ApiStatus apiStatus) {
-
-    public Game(WrappedJson j) {
-        this(j.getInt("id"), j.getString("name"), j.getString("slug"), j.getString("dateModified"),
-            new Assets(j.getJsonObject("assets")), Status.byId(j.getInt("status")), ApiStatus.byId(j.getInt("apiStatus")));
-    }
     
     public Instant dateModifiedAsInstant() {
         return Instant.parse(dateModified);
     }
     
+    @CurseForgeSchema("https://docs.curseforge.com/#schemagameassets")
     public record Assets(String iconUrl, String tileUrl, String coverUrl) {
-
-        public Assets(WrappedJson j) {
-            this(j.getString("iconUrl"), j.getString("tileUrl"), j.getString("coverUrl"));
-        }
 
     }
 
