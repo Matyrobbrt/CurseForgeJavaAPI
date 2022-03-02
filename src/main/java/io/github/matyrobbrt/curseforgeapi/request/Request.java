@@ -31,6 +31,7 @@ import java.lang.reflect.Type;
 import java.util.function.BiFunction;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
@@ -40,13 +41,17 @@ public class Request<R> extends GenericRequest {
 
     private final BiFunction<Gson, JsonObject, R> responseDecoder;
 
-    public Request(String endpoint, Method method, BiFunction<Gson, JsonObject, R> responseDecoder) {
-        super(endpoint, method);
+    public Request(String endpoint, Method method, JsonElement body, BiFunction<Gson, JsonObject, R> responseDecoder) {
+        super(endpoint, method, body);
         this.responseDecoder = responseDecoder;
     }
     
-    public Request(String endpoint, Method method, String responseObjectName, Type type) {
-        super(endpoint, method);
+    public Request(String endpoint, Method method, BiFunction<Gson, JsonObject, R> responseDecoder) {
+        this(endpoint, method, null, responseDecoder);
+    }
+    
+    public Request(String endpoint, Method method, JsonElement body, String responseObjectName, Type type) {
+        super(endpoint, method, body);
         this.responseDecoder = (g, j) -> {
             final var dataElement = j.get(responseObjectName);
             if (dataElement.isJsonPrimitive()) {
@@ -54,6 +59,10 @@ public class Request<R> extends GenericRequest {
             }
             return g.fromJson(dataElement.isJsonArray() ? dataElement.getAsJsonArray() : dataElement.getAsJsonObject(), type);
         };
+    }
+    
+    public Request(String endpoint, Method method, String responseObjectName, Type type) {
+        this(endpoint, method, null, responseObjectName, type);
     }
 
     public R decodeResponse(Gson gson, JsonObject response) {

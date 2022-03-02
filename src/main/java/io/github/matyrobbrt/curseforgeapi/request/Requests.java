@@ -30,6 +30,8 @@ package io.github.matyrobbrt.curseforgeapi.request;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
@@ -60,6 +62,17 @@ public final class Requests {
      * Games
      *
      ***********************************/
+
+    /**
+     * Get a single game. A private game is only accessible by its respective API
+     * key.
+     * 
+     * @param  gameId the id of the game to get
+     * @return
+     */
+    public static Request<Game> getGame(int gameId) {
+        return new Request<>("/v1/games/" + gameId, Method.GET, "data", Types.GAME);
+    }
 
     /**
      * Get all games that are available to your API key.
@@ -222,6 +235,46 @@ public final class Requests {
             Method.GET, "data", Types.FILE_LIST);
     }
 
+    /**
+     * Get a list of files.
+     * 
+     * @param  fileIds a list of file ids to fetch
+     * @return         the request
+     */
+    public static Request<List<File>> getFiles(int... fileIds) {
+        final var body = new JsonObject();
+        final var array = new JsonArray();
+        for (final var id : fileIds) {
+            array.add(id);
+        }
+        body.add("fileIds", array);
+        return new Request<>("/v1/mods/files", Method.POST, body, "data", Types.FILE_LIST);
+    }
+
+    /**
+     * Get the changelog of a file in HTML format.
+     * 
+     * @param  modId  the mod id (project id) the file belongs to
+     * @param  fileId the file id
+     * @return        the request
+     */
+    public static Request<String> getModFileChangelog(int modId, int fileId) {
+        return new Request<>("/v1/mods/%s/files/%s/changelog".formatted(modId, fileId), Method.GET, "data",
+            Types.STRING);
+    }
+
+    /**
+     * Get a download url for a specific file.
+     * 
+     * @param  modId  the mod id (project id) the file belongs to
+     * @param  fileId the file id
+     * @return        the request
+     */
+    public static Request<String> getModFileDownloadURL(int modId, int fileId) {
+        return new Request<>("/v1/mods/%s/files/%s/download-url".formatted(modId, fileId), Method.GET, "data",
+            Types.STRING);
+    }
+
     public static String format(String str, @Nullable Query query) {
         return format(str, query == null ? null : query.toArgs());
     }
@@ -233,6 +286,7 @@ public final class Requests {
 
     //@formatter:off
     public static final class Types {
+        public static final Type GAME = new TypeToken<Game>() {}.getType();
         public static final Type GAME_LIST = new TypeToken<List<Game>>() {}.getType();
         public static final Type GAME_VERSION_TYPE_LIST = new TypeToken<List<GameVersionType>>() {}.getType();
         public static final Type GAME_VERSIONS_BY_TYPE_LIST = new TypeToken<List<GameVersionsByType>>() {}.getType();

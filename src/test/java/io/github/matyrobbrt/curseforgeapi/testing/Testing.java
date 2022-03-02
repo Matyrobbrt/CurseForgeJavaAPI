@@ -95,5 +95,11 @@ final class Testing {
             .isNotEmpty()
             .anyMatch(type -> type.name().equals("Minecraft 1.18"));
     }
+    
+    @Test
+    void changelogExists() throws CurseForgeException {
+        final var changelogOptional = CF_API.makeRequest(getModFileChangelog(570544, 3657902));
+        assertThat(changelogOptional).isPresent();
+    }
 
 }

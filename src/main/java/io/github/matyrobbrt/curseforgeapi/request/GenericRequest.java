@@ -29,16 +29,19 @@ package io.github.matyrobbrt.curseforgeapi.request;
 
 import com.google.gson.JsonElement;
 
+import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
+
 public class GenericRequest {
     private final String endpoint;
     private final Method method;
+    @Nullable
     private final JsonElement body;
     
     public GenericRequest(String endpoint, Method method) {
         this(endpoint, method, null);
     }
     
-    public GenericRequest(String endpoint, Method method, JsonElement body) {
+    public GenericRequest(String endpoint, Method method, @Nullable JsonElement body) {
         this.endpoint = endpoint;
         this.method = method;
         this.body = body;
@@ -52,6 +55,7 @@ public class GenericRequest {
         return endpoint;
     }
 
+    @Nullable
     public JsonElement body() {
         return body;
     }
