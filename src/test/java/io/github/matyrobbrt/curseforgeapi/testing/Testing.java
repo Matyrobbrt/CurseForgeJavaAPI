@@ -37,10 +37,18 @@ import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
 import io.github.matyrobbrt.curseforgeapi.util.Constants.GameIDs;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 
-import static io.github.matyrobbrt.curseforgeapi.testing.Assertions.*;
 import static io.github.matyrobbrt.curseforgeapi.request.Requests.*;
+import static io.github.matyrobbrt.curseforgeapi.testing.Assertions.*;
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Most tests made in this class use the <a href=
+ * "https://www.curseforge.com/minecraft/mc-mods/eating-animation-forge">Eating
+ * Animations</a> project.
+ * 
+ * @author matyrobbrt
+ *
+ */
 @SuppressWarnings("static-method")
 final class Testing {
 
@@ -50,36 +58,38 @@ final class Testing {
     @Test
     void searchResultsShouldBeValid() throws CurseForgeException {
         final var helper = CF_API.getHelper();
-        
+
         final var optionalCategories = helper.getCategories(GameIDs.MINECRAFT);
         assertThat(optionalCategories).isPresent();
-        
-        final var optCategory = optionalCategories.get().stream()
+
+        final var optCategory = optionalCategories
+            .get()
+            .stream()
             .filter(category -> "Armor, Tools, and Weapons".equals(category.name()))
             .findAny();
         assertThat(optCategory).isPresent();
     }
-    
+
     @Test
     void tryDownloadFile() throws CurseForgeException, IOException {
         final var helper = CF_API.getHelper();
-        
+
         final var optionalFiles = helper.getModFiles(570544);
         assertThat(optionalFiles).isPresent();
-        
+
         final var files = optionalFiles.get();
         assertThat(files).isNotEmpty();
-        
+
         final var dowPath = Path.of("test", "test.jar");
         files.get(0).download(dowPath);
         assertThat(dowPath).exists();
     }
-    
+
     @Test
     void gameVersionIsValid() throws CurseForgeException {
         final var optionalTypes = CF_API.makeRequest(getGameVersionTypes(GameIDs.MINECRAFT));
         assertThat(optionalTypes).isPresent();
-        
+
         final var types = optionalTypes.get();
         assertThat(types)
             .isNotEmpty()
