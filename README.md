@@ -24,3 +24,6 @@ dependencies {
 ```
 
 Latest versions can be found on [Maven](https://repo1.maven.org/maven2/io/github/matyrobbrt/curseforgeapi/).
+
+# Using the library
+See the [Getting Started](https://github.com/Matyrobbrt/CurseForgeJavaAPI/wiki/GetStarted) page on how to use this library!

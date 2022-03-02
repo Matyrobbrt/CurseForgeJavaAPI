@@ -47,10 +47,10 @@ import io.github.matyrobbrt.curseforgeapi.util.ExceptionSupplier;
  * A response object which may or may not contain a value. Similar
  * Implementation to {@link Optional}.
  * 
- * @author        matyrobbrt
+ * @author     matyrobbrt
  *
- * @param  <T>the type of value
- * @see           Optional
+ * @param  <T> the type of value
+ * @see        Optional
  */
 @ParametersAreNonnullByDefault
 public final class Response<T> {
@@ -96,11 +96,9 @@ public final class Response<T> {
     public static <T> Response<T> ofNullable(@Nullable T value, @Nullable Integer statusCode) {
         return value == null ? empty(statusCode) : of(value, statusCode);
     }
-    
+
     public static <T> Response<T> ofNullableAndStatusCode(@Nullable T value, @Nullable Integer statusCode) {
-        if (statusCode == Constants.StatusCodes.NOT_FOUND) {
-            return empty(statusCode);
-        }
+        if (statusCode == Constants.StatusCodes.NOT_FOUND) { return empty(statusCode); }
         return value == null ? empty(statusCode) : of(value, statusCode);
     }
 
@@ -320,7 +318,7 @@ public final class Response<T> {
      * If a response value is present, returns a sequential {@link Stream}
      * containing only that value, otherwise returns an empty {@code Stream}.
      *
-     * @return  the response value as a {@code Stream}
+     * @return the response value as a {@code Stream}
      */
     public Stream<T> stream() {
         if (!isPresent()) {
@@ -360,9 +358,9 @@ public final class Response<T> {
      * If a value is present, returns the value, otherwise throws
      * {@code NoSuchElementException}.
      *
-     * @return                         the non-{@code null} value described by this
-     *                                 {@code Response}
-     * @throws  NoSuchElementException if no value is present
+     * @return                        the non-{@code null} value described by this
+     *                                {@code Response}
+     * @throws NoSuchElementException if no value is present
      */
     public T get() {
         if (value == null) { throw new NoSuchElementException("No value present"); }
@@ -384,14 +382,14 @@ public final class Response<T> {
     /**
      * If a value is present, returns the value, otherwise throws an exception
      * produced by the exception supplying function.
-
-     * @param   <X>                  Type of the exception to be thrown
-     * @param   exceptionSupplier    the supplying function that produces an
-     *                               exception to be thrown
-     * @return                       the value, if present
-     * @throws  X                    if no value is present
-     * @throws  NullPointerException if no value is present and the exception
-     *                               supplying function is {@code null}
+     * 
+     * @param  <X>                  Type of the exception to be thrown
+     * @param  exceptionSupplier    the supplying function that produces an
+     *                              exception to be thrown
+     * @return                      the value, if present
+     * @throws X                    if no value is present
+     * @throws NullPointerException if no value is present and the exception
+     *                              supplying function is {@code null}
      */
     public <X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
         if (value != null) {
