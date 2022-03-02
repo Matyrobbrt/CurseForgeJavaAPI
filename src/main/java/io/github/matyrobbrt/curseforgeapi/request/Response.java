@@ -320,9 +320,6 @@ public final class Response<T> {
      * If a response value is present, returns a sequential {@link Stream}
      * containing only that value, otherwise returns an empty {@code Stream}.
      *
-     * @apiNote This method can be used to transform a {@code Stream} of responses
-     *          to a {@code Stream} of present value elements:
-     *
      * @return  the response value as a {@code Stream}
      */
     public Stream<T> stream() {
@@ -363,9 +360,6 @@ public final class Response<T> {
      * If a value is present, returns the value, otherwise throws
      * {@code NoSuchElementException}.
      *
-     * @apiNote                        The preferred alternative to this method is
-     *                                 {@link #orElseThrow()}.
-     *
      * @return                         the non-{@code null} value described by this
      *                                 {@code Response}
      * @throws  NoSuchElementException if no value is present
@@ -390,12 +384,7 @@ public final class Response<T> {
     /**
      * If a value is present, returns the value, otherwise throws an exception
      * produced by the exception supplying function.
-     *
-     * @apiNote                      A method reference to the exception constructor
-     *                               with an empty argument list can be used as the
-     *                               supplier. For example,
-     *                               {@code IllegalStateException::new}
-     *
+
      * @param   <X>                  Type of the exception to be thrown
      * @param   exceptionSupplier    the supplying function that produces an
      *                               exception to be thrown

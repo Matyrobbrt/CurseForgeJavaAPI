@@ -53,6 +53,11 @@ java {
 }
 
 allprojects {
+    compileJava {
+        options.release = 17
+    }
+    javadoc.options.addStringOption('Xdoclint:none', '-quiet')
+    
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
     apply plugin: 'io.codearte.nexus-staging'
