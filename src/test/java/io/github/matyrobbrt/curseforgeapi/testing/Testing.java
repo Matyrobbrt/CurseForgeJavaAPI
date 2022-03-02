@@ -27,18 +27,21 @@
 
 package io.github.matyrobbrt.curseforgeapi.testing;
 
-import org.junit.jupiter.api.Test;
+import java.io.IOException;
+import java.nio.file.Path;
 
-import static io.github.matyrobbrt.curseforgeapi.testing.TestUtils.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
-import io.github.matyrobbrt.curseforgeapi.request.Arguments;
-import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.util.Constants.GameIDs;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 
+import static io.github.matyrobbrt.curseforgeapi.testing.Assertions.*;
+import static io.github.matyrobbrt.curseforgeapi.request.Requests.*;
+import static org.assertj.core.api.Assertions.*;
+
+@SuppressWarnings("static-method")
 final class Testing {
 
     public static final String API_KEY = Dotenv.load().get("API_KEY");
@@ -46,20 +49,41 @@ final class Testing {
 
     @Test
     void searchResultsShouldBeValid() throws CurseForgeException {
-        final var optionalCategories = CF_API
-            .makeRequest(Requests.getCategories(Arguments.of("gameId", GameIDs.MINECRAFT)));
+        final var helper = CF_API.getHelper();
+        
+        final var optionalCategories = helper.getCategories(GameIDs.MINECRAFT);
         assertThat(optionalCategories).isPresent();
+        
         final var optCategory = optionalCategories.get().stream()
-            .filter(category -> "Armor, Tools, and Weapons".equals(category != null ? category.name() : null))
+            .filter(category -> "Armor, Tools, and Weapons".equals(category.name()))
             .findAny();
         assertThat(optCategory).isPresent();
     }
-
-    public static void main(String[] args) throws CurseForgeException {
-    	CF_API.makeRequest(Requests.getCategories(Arguments.of("gameId", GameIDs.MINECRAFT)))
-        .ifPresent(categories -> {
-            System.out.println(categories);
-        });
+    
+    @Test
+    void tryDownloadFile() throws CurseForgeException, IOException {
+        final var helper = CF_API.getHelper();
+        
+        final var optionalFiles = helper.getModFiles(570544);
+        assertThat(optionalFiles).isPresent();
+        
+        final var files = optionalFiles.get();
+        assertThat(files).isNotEmpty();
+        
+        final var dowPath = Path.of("test", "test.jar");
+        files.get(0).download(dowPath);
+        assertThat(dowPath).exists();
+    }
+    
+    @Test
+    void gameVersionIsValid() throws CurseForgeException {
+        final var optionalTypes = CF_API.makeRequest(getGameVersionTypes(GameIDs.MINECRAFT));
+        assertThat(optionalTypes).isPresent();
+        
+        final var types = optionalTypes.get();
+        assertThat(types)
+            .isNotEmpty()
+            .anyMatch(type -> type.name().equals("Minecraft 1.18"));
     }
 
 }

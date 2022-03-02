@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nonnull;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
+import io.github.matyrobbrt.curseforgeapi.util.Constants;
 import io.github.matyrobbrt.curseforgeapi.util.ExceptionFunction;
 import io.github.matyrobbrt.curseforgeapi.util.ExceptionSupplier;
 
@@ -93,6 +94,13 @@ public final class Response<T> {
      *                    {@code Response}
      */
     public static <T> Response<T> ofNullable(@Nullable T value, @Nullable Integer statusCode) {
+        return value == null ? empty(statusCode) : of(value, statusCode);
+    }
+    
+    public static <T> Response<T> ofNullableAndStatusCode(@Nullable T value, @Nullable Integer statusCode) {
+        if (statusCode == Constants.StatusCodes.NOT_FOUND) {
+            return empty(statusCode);
+        }
         return value == null ? empty(statusCode) : of(value, statusCode);
     }
 

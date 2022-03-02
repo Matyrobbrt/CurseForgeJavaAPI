@@ -25,21 +25,9 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.schemas;
-
-import java.time.Instant;
+package io.github.matyrobbrt.curseforgeapi.schemas.game;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 
-@CurseForgeSchema("https://docs.curseforge.com/#tocS_Game")
-public record Game(int id, String name, String slug, String dateModified, Assets assets, Status status,
-    ApiStatus apiStatus) {
-    
-    public Instant dateModifiedAsInstant() {
-        return Instant.parse(dateModified);
-    }
-    
-    @CurseForgeSchema("https://docs.curseforge.com/#schemagameassets")
-    public record Assets(String iconUrl, String tileUrl, String coverUrl) {}
-
-}
+@CurseForgeSchema("https://docs.curseforge.com/#tocS_GameVersionType")
+public record GameVersionType(int id, int gameId, String name, String slug) {}

@@ -25,22 +25,4 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.testing;
-
-import org.junit.jupiter.api.Test;
-
-import io.github.matyrobbrt.curseforgeapi.request.Requests;
-import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
-
-import static io.github.matyrobbrt.curseforgeapi.testing.Testing.CF_API;
-
-import static org.assertj.core.api.Assertions.*;
-
-class CFApiTesting {
-
-    @Test
-    void test() throws CurseForgeException {
-        assertThat(CF_API.makeRequest(Requests.getGames(null)).toOptional()).isPresent();
-    }
-
-}
+package io.github.matyrobbrt.curseforgeapi.request.query;

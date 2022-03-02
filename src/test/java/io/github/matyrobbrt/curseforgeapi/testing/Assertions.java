@@ -25,4 +25,17 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.request.objects;
+package io.github.matyrobbrt.curseforgeapi.testing;
+
+import org.assertj.core.api.AssertionsForClassTypes;
+import org.assertj.core.api.OptionalAssert;
+
+import io.github.matyrobbrt.curseforgeapi.request.Response;
+
+public class Assertions {
+
+    public static <VALUE> OptionalAssert<VALUE> assertThat(Response<VALUE> actual) {
+        return AssertionsForClassTypes.assertThat(actual.toOptional());
+    }
+
+}

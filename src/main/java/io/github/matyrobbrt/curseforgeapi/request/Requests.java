@@ -32,17 +32,17 @@ import java.util.List;
 
 import com.google.gson.reflect.TypeToken;
 
-import io.github.matyrobbrt.curseforgeapi.annotation.AcceptsArgs;
-import io.github.matyrobbrt.curseforgeapi.annotation.Arg;
-import io.github.matyrobbrt.curseforgeapi.annotation.Nonnull;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
-import io.github.matyrobbrt.curseforgeapi.request.objects.ModSearchQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.Query;
 import io.github.matyrobbrt.curseforgeapi.schemas.Category;
-import io.github.matyrobbrt.curseforgeapi.schemas.Game;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
+import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
+import io.github.matyrobbrt.curseforgeapi.schemas.game.GameVersionType;
+import io.github.matyrobbrt.curseforgeapi.schemas.game.GameVersionsByType;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
-
-import static io.github.matyrobbrt.curseforgeapi.annotation.Arg.Type.*;
 
 /**
  * A utility class that contains methods for creating common requests. Please
@@ -64,16 +64,52 @@ public final class Requests {
     /**
      * Get all games that are available to your API key.
      * 
-     * @param  args the arguments for the request. Can be {@link Arguments#EMPTY} or
-     *              {@code null}.
-     * @return      a request which will get all the games available to the API key.
+     * @return a request which will get all the games available to the API key.
      */
-    @AcceptsArgs({
-        @Arg(name = "index", description = "A zero based index of the first item to include in the response.", type = INTEGER),
-        @Arg(name = "pageSize", description = "The number of items to include in the response", type = INTEGER)
-    })
-    public static Request<List<Game>> getGames(@Nullable Arguments args) {
-        return new Request<>(format("/v1/games", args), Method.GET, "data", Types.GAME_LIST);
+    public static Request<List<Game>> getGames() {
+        return getGames(null);
+    }
+
+    /**
+     * Get all games that are available to your API key.
+     * 
+     * @param  paginationQuery the pagination query used for the request
+     * @return                 a request which will get all the games available to
+     *                         the API key.
+     */
+    public static Request<List<Game>> getGames(@Nullable PaginationQuery paginationQuery) {
+        return new Request<>(format("/v1/games", paginationQuery), Method.GET, "data", Types.GAME_LIST);
+    }
+
+    /**
+     * Get all available versions for each known version type of the specified game.
+     * A private game is only accessible to its respective API key.
+     * 
+     * @param  gameId the game id to get the versions for
+     * @return        the request
+     */
+    public static Request<List<GameVersionsByType>> getGameVersions(int gameId) {
+        return new Request<>("/v1/games/%s/versions".formatted(gameId), Method.GET, "data",
+            Types.GAME_VERSIONS_BY_TYPE_LIST);
+    }
+
+    /**
+     * Get all available version types of the specified game.
+     * 
+     * A private game is only accessible to its respective API key.
+     * 
+     * Currently, when creating games via the CurseForge Core Console, you are
+     * limited to a single game version type. This means that this endpoint is
+     * probably not useful in most cases and is relevant mostly when handling
+     * existing games that have multiple game versions such as World of Warcraft and
+     * Minecraft (e.g. 517 for wow_retail).
+     * 
+     * @param  gameId the game id to get the version types for
+     * @return        the request
+     */
+    public static Request<List<GameVersionType>> getGameVersionTypes(int gameId) {
+        return new Request<>("/v1/games/%s/version-types".formatted(gameId), Method.GET, "data",
+            Types.GAME_VERSION_TYPE_LIST);
     }
 
     /**********************************
@@ -83,17 +119,26 @@ public final class Requests {
      ***********************************/
 
     /**
-     * Get all of the categories which match the given arguments,
+     * Get all of the categories which match the given {@code gameId}.
      * 
-     * @param  args the arguments to use for the query
-     * @return      the request
+     * @param  gameId The unique game id to search categories for
+     * @return        the request
      */
-    @AcceptsArgs({
-        @Arg(name = "gameId", description = "The unique game id to search categories for", type = INTEGER, required = true),
-        @Arg(name = "classId", description = "The unique class id to search categories for", type = INTEGER)
-    })
-    public static Request<List<Category>> getCategories(@Nonnull Arguments args) {
-        return new Request<>(format("/v1/categories", args), Method.GET, "data", Types.CATEGORY_LIST);
+    public static Request<List<Category>> getCategories(int gameId) {
+        return new Request<>("/v1/categories?gameId=" + gameId, Method.GET, "data", Types.CATEGORY_LIST);
+    }
+
+    /**
+     * Get all of the categories which match the given {@code gameId} and
+     * {@code classId}.
+     * 
+     * @param  gameId  The unique game id to search categories for
+     * @param  classId The unique class id to search categories for
+     * @return         the request
+     */
+    public static Request<List<Category>> getCategories(int gameId, int classId) {
+        return new Request<>("/v1/categories?gameId=%s&classId=%s".formatted(gameId, classId), Method.GET, "data",
+            Types.CATEGORY_LIST);
     }
 
     /**********************************
@@ -115,8 +160,8 @@ public final class Requests {
     /**
      * Get the description of the mod with the specified ID in the HTML format.
      * 
-     * @param  modId the mod id of the mod to request the description of (the
-     *               project ID)
+     * @param  modId the mod id of the mod to request the description of (project
+     *               id)
      * @return       the request
      */
     public static Request<String> getModDescription(int modId) {
@@ -133,6 +178,54 @@ public final class Requests {
         return new Request<>(format("/v1/mods/search", query.toArgs()), Method.GET, "data", Types.MOD_LIST);
     }
 
+    /**********************************
+     * 
+     * Files
+     *
+     ***********************************/
+
+    /**
+     * Get a single file of the specified mod.
+     * 
+     * @param  modId  the mod id the file belongs to (project id)
+     * @param  fileId the file id
+     * @return        the request
+     */
+    public static Request<File> getModFile(int modId, int fileId) {
+        return new Request<>("/v1/mods/%s/files/%s".formatted(modId, fileId), Method.GET, "data", Types.FILE);
+    }
+
+    /**
+     * Get all files of the specified mod.
+     * 
+     * @param  modid the mod id the files belong to (project id)
+     * @return       the request
+     */
+    public static Request<List<File>> getModFiles(int modid) {
+        return getModFiles(modid, null, null);
+    }
+
+    /**
+     * Get all files of the specified mod.
+     * 
+     * @param  modId             the mod id the files belong to (project id)
+     * @param  gameVersionTypeId the game version to search for
+     * @param  paginationQuery   the pagination query used for the request
+     * @return                   the request
+     */
+    public static Request<List<File>> getModFiles(int modId, @Nullable Integer gameVersionTypeId,
+        @Nullable PaginationQuery paginationQuery) {
+        return new Request<>(
+            format("/v1/mods/%s/files".formatted(modId),
+                Arguments.EMPTY.put("gameVersionTypeId", gameVersionTypeId)
+                    .putAll(paginationQuery == null ? null : paginationQuery.toArgs())),
+            Method.GET, "data", Types.FILE_LIST);
+    }
+
+    public static String format(String str, @Nullable Query query) {
+        return format(str, query == null ? null : query.toArgs());
+    }
+
     public static String format(String str, @Nullable Arguments args) {
         if (args == null) { return str; }
         return str + "?" + args.build();
@@ -141,11 +234,16 @@ public final class Requests {
     //@formatter:off
     public static final class Types {
         public static final Type GAME_LIST = new TypeToken<List<Game>>() {}.getType();
+        public static final Type GAME_VERSION_TYPE_LIST = new TypeToken<List<GameVersionType>>() {}.getType();
+        public static final Type GAME_VERSIONS_BY_TYPE_LIST = new TypeToken<List<GameVersionsByType>>() {}.getType();
         
         public static final Type CATEGORY_LIST = new TypeToken<List<Category>>() {}.getType();
         
         public static final Type MOD = new TypeToken<Mod>() {}.getType();
         public static final Type MOD_LIST = new TypeToken<List<Mod>>() {}.getType();
+        
+        public static final Type FILE = new TypeToken<File>() {}.getType();
+        public static final Type FILE_LIST = new TypeToken<List<File>>() {}.getType();
         
         public static final Type STRING = new TypeToken<String>() {}.getType();
     }

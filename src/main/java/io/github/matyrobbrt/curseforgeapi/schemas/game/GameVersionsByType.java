@@ -25,17 +25,11 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.testing;
+package io.github.matyrobbrt.curseforgeapi.schemas.game;
 
-import org.assertj.core.api.AssertionsForClassTypes;
-import org.assertj.core.api.OptionalAssert;
+import java.util.List;
 
-import io.github.matyrobbrt.curseforgeapi.request.Response;
+import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 
-public class TestUtils {
-
-    public static <VALUE> OptionalAssert<VALUE> assertThat(Response<VALUE> actual) {
-        return AssertionsForClassTypes.assertThat(actual.toOptional());
-    }
-
-}
+@CurseForgeSchema("https://docs.curseforge.com/#tocS_GameVersionsByType")
+public record GameVersionsByType(int type, List<String> versions) {}

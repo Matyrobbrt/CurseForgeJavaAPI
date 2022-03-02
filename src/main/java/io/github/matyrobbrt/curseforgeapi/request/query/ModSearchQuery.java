@@ -25,7 +25,7 @@
  * SOFTWARE.
  */
 
-package io.github.matyrobbrt.curseforgeapi.request.objects;
+package io.github.matyrobbrt.curseforgeapi.request.query;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 import io.github.matyrobbrt.curseforgeapi.request.Arguments;
@@ -37,7 +37,7 @@ import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
  *
  */
 @CurseForgeSchema("https://docs.curseforge.com/#search-mods")
-public final class ModSearchQuery {
+public final class ModSearchQuery implements Query {
     
     public static ModSearchQuery of(int gameId) {
         return new ModSearchQuery(gameId);
@@ -109,6 +109,7 @@ public final class ModSearchQuery {
         return this;
     }
     
+    @Override
     public Arguments toArgs() {
         return Arguments.of("gameId", gameId)
             .put("classId", classId)

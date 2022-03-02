@@ -27,6 +27,13 @@
 
 package io.github.matyrobbrt.curseforgeapi.schemas.file;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
@@ -39,4 +46,26 @@ public record File(int id, int gameId, int modId, boolean isAvailable, String di
     int downloadCount, String downloadUrl, List<String> gameVersions, List<SortableGameVersion> sortableGameVersions,
     List<FileDependency> dependencies, @Nullable Boolean exposeAsAlternative, @Nullable Integer parentProjectFileId,
     @Nullable Integer alternateFileId, @Nullable Boolean isServerPack, @Nullable Integer serverPackFileId,
-    int fileFingerprint, List<FileModule> modules) {}
+    int fileFingerprint, List<FileModule> modules) {
+
+    /**
+     * Attempts to download the file to the specified {@code path}, creating any
+     * directories to it, if they do not exist.
+     * 
+     * @param  path        the path to save the file to
+     * @throws IOException if an exception occurs while downloading
+     */
+    public void download(Path path) throws IOException {
+        final var url = new URL(downloadUrl());
+        if (path.getParent() != null) {
+            Files.createDirectories(path.getParent());
+        }
+        if (path.toFile().exists()) { throw new FileAlreadyExistsException(path.toString()); }
+        try (final var readChannel = Channels.newChannel(url.openStream());
+            final var fos = new FileOutputStream(path.toFile())) {
+            final var writeChannel = fos.getChannel();
+            writeChannel.transferFrom(readChannel, 0, Long.MAX_VALUE);
+        }
+    }
+
+}

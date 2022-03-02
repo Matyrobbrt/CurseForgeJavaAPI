@@ -30,6 +30,8 @@ package io.github.matyrobbrt.curseforgeapi.request;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
+
 /**
  * A list of keys and values for specifying arguments when send a request to
  * CurseForge.
@@ -51,10 +53,22 @@ public class Arguments {
         this.args = args;
     }
 
-    public Arguments put(String key, Object value) {
+    public Arguments put(String key, @Nullable Object value) {
         if (value != null) {
             args.put(key, value.toString());
         }
+        return this;
+    }
+    
+    public Arguments copy() {
+        return new Arguments(args);
+    }
+    
+    public Arguments putAll(@Nullable Arguments other) {
+        if (other == null) {
+            return this;
+        }
+        args.putAll(other.args);
         return this;
     }
 
@@ -80,7 +94,20 @@ public class Arguments {
         @Override
         public Arguments put(String key, Object value) {
             final var newArgs = new HashMap<>(args);
+            if (value == null) {
+                return new Arguments(newArgs);
+            }
             newArgs.put(key, value.toString());
+            return new Arguments(newArgs);
+        }
+        
+        @Override
+        public Arguments putAll(@Nullable Arguments other) {
+            final var newArgs = new HashMap<>(args);
+            if (other == null) {
+                return new Arguments(newArgs);
+            }
+            newArgs.putAll(other.args);
             return new Arguments(newArgs);
         }
         

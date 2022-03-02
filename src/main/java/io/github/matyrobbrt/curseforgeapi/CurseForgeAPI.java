@@ -34,7 +34,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -49,32 +48,22 @@ import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefau
 import io.github.matyrobbrt.curseforgeapi.request.AsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.GenericRequest;
 import io.github.matyrobbrt.curseforgeapi.request.Request;
+import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.request.Response;
+import io.github.matyrobbrt.curseforgeapi.request.helper.AsyncRequestHelper;
+import io.github.matyrobbrt.curseforgeapi.request.helper.RequestHelper;
 import io.github.matyrobbrt.curseforgeapi.schemas.ApiStatus;
-import io.github.matyrobbrt.curseforgeapi.schemas.Category;
-import io.github.matyrobbrt.curseforgeapi.schemas.Game;
 import io.github.matyrobbrt.curseforgeapi.schemas.HashAlgo;
-import io.github.matyrobbrt.curseforgeapi.schemas.SortableGameVersion;
 import io.github.matyrobbrt.curseforgeapi.schemas.Status;
-import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
-import io.github.matyrobbrt.curseforgeapi.schemas.file.FileDependency;
-import io.github.matyrobbrt.curseforgeapi.schemas.file.FileHash;
-import io.github.matyrobbrt.curseforgeapi.schemas.file.FileIndex;
-import io.github.matyrobbrt.curseforgeapi.schemas.file.FileModule;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.FileRelationType;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.FileReleaseType;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.FileStatus;
-import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
-import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModAsset;
-import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModAuthor;
-import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLinks;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModStatus;
-import io.github.matyrobbrt.curseforgeapi.schemas.Game.Assets;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 import io.github.matyrobbrt.curseforgeapi.util.Utils;
 import io.github.matyrobbrt.curseforgeapi.util.gson.CFSchemaEnumTypeAdapter;
-import io.github.matyrobbrt.curseforgeapi.util.gson.RecordDeserializer;
+import io.github.matyrobbrt.curseforgeapi.util.gson.RecordTypeAdapterFactory;
 
 /**
  * The main class used for communicating with
@@ -93,6 +82,9 @@ public class CurseForgeAPI {
     private final HttpClient httpClient;
     private final Gson gson;
     private final Logger logger;
+    
+    private final RequestHelper helper = new RequestHelper(this);
+    private final AsyncRequestHelper asyncHelper = new AsyncRequestHelper(this);
 
     //@formatter:off
     public CurseForgeAPI(final String apiKey) {
@@ -101,28 +93,8 @@ public class CurseForgeAPI {
         
         final var gsonBuilder = new GsonBuilder()
             .setPrettyPrinting()
-            .serializeNulls()
-            .disableHtmlEscaping();
-        
-        class GsonRegisterHelper {
-            final List<Class<? extends Record>> records;
-            
-            @SafeVarargs
-            public GsonRegisterHelper(Class<? extends Record>... records) {
-                this.records = Arrays.asList(records);
-            }
-            
-            public void applyToBuilder(GsonBuilder builder) {
-                records.forEach(c -> builder.registerTypeAdapter(c, new RecordDeserializer<>(c, CurseForgeAPI.this::getGson)));
-            }
-        }
-        
-        final var gsonRegisterHelper = new GsonRegisterHelper(
-            Game.class, Assets.class, File.class, FileDependency.class, FileHash.class,
-            FileIndex.class, FileModule.class, Category.class, Mod.class, ModAsset.class,
-            ModAuthor.class, ModLinks.class, SortableGameVersion.class
-        );
-        gsonRegisterHelper.applyToBuilder(gsonBuilder);
+            .disableHtmlEscaping()
+            .registerTypeAdapterFactory(new RecordTypeAdapterFactory());
         
         final List<Class<? extends Enum<?>>> cfSchemaEnums = List.of(
             ApiStatus.class, FileRelationType.class, FileReleaseType.class, FileStatus.class,
@@ -158,6 +130,20 @@ public class CurseForgeAPI {
         return apiKey;
     }
 
+    /**
+     * @return the helper used for direct requests, without going through {@link Requests} first
+     */
+    public RequestHelper getHelper() {
+        return helper;
+    }
+    
+    /**
+     * @return the helper used for direct async requests, without going through {@link Requests} first
+     */
+    public AsyncRequestHelper getAsyncHelper() {
+        return asyncHelper;
+    }
+    
     /**
      * Sends a <b>blocking</b> request to the API
      * 
@@ -197,7 +183,7 @@ public class CurseForgeAPI {
             }).build();
             final var response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             statusCode = response.statusCode();
-            return Response.ofNullable(gson.fromJson(response.body(), JsonObject.class), statusCode);
+            return Response.ofNullableAndStatusCode(gson.fromJson(response.body(), JsonObject.class), statusCode);
         } catch (InterruptedException ine) {
             logger.error(
                 "InterruptedException while awaiting CurseForge response, which returned with the status code: ", ine);
@@ -251,7 +237,7 @@ public class CurseForgeAPI {
                 return r;
             }).build();
             return new AsyncRequest<>(() -> httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
-                .thenApply(response -> Response.ofNullable(gson.fromJson(response.body(), JsonObject.class),
+                .thenApply(response -> Response.ofNullableAndStatusCode(gson.fromJson(response.body(), JsonObject.class),
                     response.statusCode())));
         } catch (Exception e) {
             throw new CurseForgeException(e);
