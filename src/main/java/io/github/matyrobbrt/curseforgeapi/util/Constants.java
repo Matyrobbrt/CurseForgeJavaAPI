@@ -34,6 +34,11 @@ package io.github.matyrobbrt.curseforgeapi.util;
  *
  */
 public final class Constants {
+    
+    /**
+     * The minimum CurseForge project ID.
+     */
+    public static final int MIN_PROJECT_ID = 10;
 
     /**
      * @see <a href=

@@ -33,6 +33,7 @@ import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.request.Response;
+import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
 import io.github.matyrobbrt.curseforgeapi.schemas.Category;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
@@ -100,6 +101,14 @@ public class RequestHelper implements IRequestHelper {
     @Override
     public Response<Mod> getMod(int modId) throws CurseForgeException {
         return api.makeRequest(Requests.getMod(modId));
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<List<Mod>> searchMods(ModSearchQuery query) throws CurseForgeException {
+        return api.makeRequest(Requests.searchMods(query));
     }
 
 }

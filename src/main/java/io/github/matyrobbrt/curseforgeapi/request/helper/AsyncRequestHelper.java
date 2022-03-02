@@ -34,6 +34,7 @@ import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.request.AsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.request.Response;
+import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
 import io.github.matyrobbrt.curseforgeapi.schemas.Category;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
@@ -101,6 +102,14 @@ public class AsyncRequestHelper implements IRequestHelper {
     @Override
     public AsyncRequest<Response<Mod>> getMod(int modId) throws CurseForgeException {
         return api.makeAsyncRequest(Requests.getMod(modId));
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AsyncRequest<Response<List<Mod>>> searchMods(ModSearchQuery query) throws CurseForgeException {
+        return api.makeAsyncRequest(Requests.searchMods(query));
     }
 
 }

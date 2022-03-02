@@ -29,13 +29,21 @@ package io.github.matyrobbrt.curseforgeapi.testing;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
+import io.github.matyrobbrt.curseforgeapi.request.Response;
 import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery.SortField;
+import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
+import io.github.matyrobbrt.curseforgeapi.util.Constants;
 import io.github.matyrobbrt.curseforgeapi.util.Constants.GameIDs;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 
@@ -58,7 +66,7 @@ final class Testing {
     public static final CurseForgeAPI CF_API = new CurseForgeAPI(API_KEY);
 
     @Test
-    void searchResultsShouldBeValid() throws CurseForgeException {
+    void categoryShouldExist() throws CurseForgeException {
         final var helper = CF_API.getHelper();
 
         final var optionalCategories = helper.getCategories(GameIDs.MINECRAFT);
@@ -116,6 +124,87 @@ final class Testing {
         assertThat(featuredMods.featured()).isNotEmpty();
         assertThat(featuredMods.popular()).isNotEmpty();
         assertThat(featuredMods.recentlyUpdated()).isNotEmpty();
+    }
+    
+    @Test
+    void searchResultsShouldBeValid() throws CurseForgeException {
+        final var helper = CF_API.getHelper();
+        
+        final Response<Game> gameResponse = CF_API.makeRequest(Requests.getGame(432));
+        assertThat(gameResponse).isPresent();
+        final var game = gameResponse.get();
+
+        final var categoriesResponse = helper.getCategories(game.id());
+        assertThat(categoriesResponse).isPresent();
+        
+        final var optionalCategory = categoriesResponse.get()
+            .stream()
+            .filter(category -> "Armor, Tools, and Weapons".equals(category.name()))
+            .findAny();
+        assertThat(categoriesResponse).isPresent();
+        
+        final var category = optionalCategory.get();
+
+        final var query = ModSearchQuery.of(game)
+            .category(category)
+            .gameVersion("1.12.2")
+            .index(1)
+            .pageSize(20)
+            .searchFilter("Weapons")
+            .sortField(SortField.LAST_UPDATED);
+        assertThat(query.toString()).isNotEmpty();
+        
+        assertThat(helper.searchMods(query))
+            .isPresent()
+            .get()
+            .asList()
+            .hasSizeGreaterThan(15);
+    }
+    
+    @Test
+    void fileShouldBeInvalid() throws CurseForgeException {
+        assertThat(CF_API.getHelper().getModFile(Integer.MIN_VALUE, Integer.MAX_VALUE)).isEmpty();
+    }
+    
+    @Test
+    void minecraftShouldExist() throws CurseForgeException {
+        final Response<List<Game>> gamesResponse = CF_API.makeRequest(Requests.getGames());
+        assertThat(gamesResponse).isPresent();
+        
+        final List<Game> games = gamesResponse.get();
+        assertThat(games).anyMatch(g -> g.id() == GameIDs.MINECRAFT);
+    }
+    
+    @Test
+    void gamesHaveCategories() throws CurseForgeException {
+        final Response<List<Game>> gamesResponse = CF_API.makeRequest(Requests.getGames());
+        assertThat(gamesResponse).isPresent();
+        
+        for (final Game game : gamesResponse.get()) {
+            assertThat(CF_API.getHelper().getCategories(game.id()))
+                .isPresent()
+                .get()
+                .asList()
+                .isNotEmpty();
+        }
+    }
+    
+    @Test
+    void projectsCanBeFound() throws CurseForgeException {
+        final var responses = IntStream.range(Constants.MIN_PROJECT_ID, Constants.MIN_PROJECT_ID + 4)
+            .<Response<Mod>>mapToObj(i -> {
+                try {
+                    return CF_API.makeRequest(Requests.getMod(i));
+                } catch (CurseForgeException e) {
+                    e.printStackTrace();
+                }
+                return Response.empty(null);
+            })
+            .filter(Response::isPresent)
+            .map(Response::get)
+            .toList();
+        
+        assertThat(responses).hasSize(4);
     }
 
 }

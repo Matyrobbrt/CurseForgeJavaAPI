@@ -29,6 +29,8 @@ package io.github.matyrobbrt.curseforgeapi.request.query;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 import io.github.matyrobbrt.curseforgeapi.request.Arguments;
+import io.github.matyrobbrt.curseforgeapi.schemas.Category;
+import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
 
 /**
@@ -38,6 +40,10 @@ import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
  */
 @CurseForgeSchema("https://docs.curseforge.com/#search-mods")
 public final class ModSearchQuery implements Query {
+    
+    public static ModSearchQuery of(Game game) {
+        return of(game.id());
+    }
     
     public static ModSearchQuery of(int gameId) {
         return new ModSearchQuery(gameId);
@@ -67,6 +73,10 @@ public final class ModSearchQuery implements Query {
     public ModSearchQuery categoryId(final int categoryId) {
         this.categoryId = categoryId;
         return this;
+    }
+    
+    public ModSearchQuery category(Category category) {
+        return categoryId(category.id());
     }
     
     public ModSearchQuery gameVersion(final String gameVersion) {
@@ -124,6 +134,11 @@ public final class ModSearchQuery implements Query {
             .put("pageSize", pageSize);
     }
     
+    @Override
+    public String toString() {
+        return toArgs().build();
+    }
+    
     public enum SortField {
         FEATURED, POPULARITY, LAST_UPDATED, NAME, AUTHOR, TOTAL_DOWNLOADS, CATEGORY, GAME_VERSION
     }
@@ -141,4 +156,5 @@ public final class ModSearchQuery implements Query {
             }
         }
     }
+
 }

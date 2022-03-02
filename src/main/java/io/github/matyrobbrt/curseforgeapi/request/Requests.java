@@ -223,6 +223,16 @@ public final class Requests {
     /**
      * Get all files of the specified mod.
      * 
+     * @param  mod the mod
+     * @return     the request
+     */
+    public static Request<List<File>> getModFiles(Mod mod) {
+        return getModFiles(mod.id());
+    }
+
+    /**
+     * Get all files of the specified mod.
+     * 
      * @param  modid the mod id the files belong to (project id)
      * @return       the request
      */

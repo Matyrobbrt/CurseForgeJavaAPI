@@ -32,5 +32,5 @@ import io.github.matyrobbrt.curseforgeapi.request.Arguments;
 public interface Query {
 
     Arguments toArgs();
-    
+
 }

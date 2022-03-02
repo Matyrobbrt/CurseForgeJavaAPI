@@ -30,6 +30,7 @@ package io.github.matyrobbrt.curseforgeapi.request.helper;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
+import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 
@@ -51,6 +52,11 @@ public interface IRequestHelper {
      */
     Object getModFiles(int modId, @Nullable Integer gameVersionTypeId,
         @Nullable PaginationQuery paginationQuery) throws CurseForgeException;
+    
+    /**
+     * @see Requests#searchMods(ModSearchQuery)
+     */
+    Object searchMods(ModSearchQuery query) throws CurseForgeException;
     
     /**
      * @see Requests#getCategories(int)
