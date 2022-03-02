@@ -34,14 +34,14 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 public class CFSchemaEnumTypeAdapter<E extends Enum<E>> extends TypeAdapter<E> {
-    
+
     @SuppressWarnings("unchecked")
     public static <E extends Enum<E>> CFSchemaEnumTypeAdapter<E> constructUnsafe(Class<?> clazz) {
         return new CFSchemaEnumTypeAdapter<>((Class<E>) clazz);
     }
-    
+
     private final Class<E> clazz;
-    
+
     public CFSchemaEnumTypeAdapter(Class<E> clazz) {
         this.clazz = clazz;
     }

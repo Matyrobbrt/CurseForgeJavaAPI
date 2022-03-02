@@ -32,4 +32,10 @@ import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_FileIndex")
-public record FileIndex(String gameVersion, int fileId, String filename, FileReleaseType releaseType, @Nullable Integer gameVersionTypeId, @Nullable ModLoaderType modLoader) {}
+public record FileIndex(String gameVersion, int fileId, String filename, FileReleaseType releaseType, @Nullable Integer gameVersionTypeId, @Nullable Integer modLoaderInt) {
+    
+    public ModLoaderType modLoaderType() {
+        return ModLoaderType.byId(modLoaderInt);
+    }
+    
+}

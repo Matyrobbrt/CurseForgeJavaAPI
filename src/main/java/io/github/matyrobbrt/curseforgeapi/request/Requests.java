@@ -36,6 +36,7 @@ import com.google.gson.reflect.TypeToken;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
+import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.Query;
@@ -44,6 +45,7 @@ import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.GameVersionType;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.GameVersionsByType;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.FeaturedMods;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
 
 /**
@@ -191,6 +193,16 @@ public final class Requests {
         return new Request<>(format("/v1/mods/search", query.toArgs()), Method.GET, "data", Types.MOD_LIST);
     }
 
+    /**
+     * Get a list of featured, popular and recently updated mods.
+     * 
+     * @param  query the query used for requesting the mods
+     * @return       the request
+     */
+    public static Request<FeaturedMods> getFeaturedMods(FeaturedModsQuery query) {
+        return new Request<>("/v1/mods/featured", Method.POST, query.toJson(), "data", Types.FEATURED_MODS);
+    }
+
     /**********************************
      * 
      * Files
@@ -295,6 +307,7 @@ public final class Requests {
         
         public static final Type MOD = new TypeToken<Mod>() {}.getType();
         public static final Type MOD_LIST = new TypeToken<List<Mod>>() {}.getType();
+        public static final Type FEATURED_MODS = new TypeToken<FeaturedMods>() {}.getType();
         
         public static final Type FILE = new TypeToken<File>() {}.getType();
         public static final Type FILE_LIST = new TypeToken<List<File>>() {}.getType();

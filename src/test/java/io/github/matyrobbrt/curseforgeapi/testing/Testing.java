@@ -34,6 +34,8 @@ import org.junit.jupiter.api.Test;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
+import io.github.matyrobbrt.curseforgeapi.request.Requests;
+import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
 import io.github.matyrobbrt.curseforgeapi.util.Constants.GameIDs;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 
@@ -100,6 +102,20 @@ final class Testing {
     void changelogExists() throws CurseForgeException {
         final var changelogOptional = CF_API.makeRequest(getModFileChangelog(570544, 3657902));
         assertThat(changelogOptional).isPresent();
+    }
+    
+    @Test
+    void featuredModsExist() throws CurseForgeException {
+        final var optionalFeaturedMods = CF_API.makeRequest(Requests.getFeaturedMods(
+            FeaturedModsQuery.of(GameIDs.MINECRAFT)
+                .excludeMod(570544)
+        ));
+        assertThat(optionalFeaturedMods).isPresent();
+        
+        final var featuredMods = optionalFeaturedMods.get();
+        assertThat(featuredMods.featured()).isNotEmpty();
+        assertThat(featuredMods.popular()).isNotEmpty();
+        assertThat(featuredMods.recentlyUpdated()).isNotEmpty();
     }
 
 }

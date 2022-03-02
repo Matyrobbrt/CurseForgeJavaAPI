@@ -94,6 +94,7 @@ public class CurseForgeAPI {
         final var gsonBuilder = new GsonBuilder()
             .setPrettyPrinting()
             .disableHtmlEscaping()
+            .serializeNulls()
             .registerTypeAdapterFactory(new RecordTypeAdapterFactory());
         
         final List<Class<? extends Enum<?>>> cfSchemaEnums = List.of(
@@ -176,7 +177,8 @@ public class CurseForgeAPI {
                     .header("x-api-key", apiKey);
                 r = switch (genericRequest.method()) {
                 case GET -> r.GET();
-                case POST -> r.POST(BodyPublishers.ofString(genericRequest.body().toString()));
+                case POST -> r.POST(BodyPublishers.ofString(genericRequest.body().toString()))
+                    .header("Content-Type", "application/json");
                 case PUT -> r.PUT(BodyPublishers.ofString(genericRequest.body().toString()));
                 };
                 return r;
@@ -231,7 +233,8 @@ public class CurseForgeAPI {
                     .header("x-api-key", apiKey);
                 r = switch (genericRequest.method()) {
                 case GET -> r.GET();
-                case POST -> r.POST(BodyPublishers.ofString(genericRequest.body().toString()));
+                case POST -> r.POST(BodyPublishers.ofString(genericRequest.body().toString()))
+                    .header("Content-Type", "application/json");
                 case PUT -> r.PUT(BodyPublishers.ofString(genericRequest.body().toString()));
                 };
                 return r;
