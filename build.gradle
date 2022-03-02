@@ -66,6 +66,7 @@ allprojects {
             mavenJava(MavenPublication) {
                 from components.java
                 pom {
+                    name = "curseforgeapi"
                     description = "A Java wrapper for the CurseForge API"
                     url = 'https://github.com/Matyrobbrt/CurseForgeJavaAPI'
                     licenses {
