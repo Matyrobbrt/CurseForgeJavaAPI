@@ -46,6 +46,7 @@ import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
 import io.github.matyrobbrt.curseforgeapi.util.Constants;
 import io.github.matyrobbrt.curseforgeapi.util.Constants.GameIDs;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
+import io.github.matyrobbrt.curseforgeapi.util.Pair;
 
 import static io.github.matyrobbrt.curseforgeapi.request.Requests.*;
 import static io.github.matyrobbrt.curseforgeapi.testing.Assertions.*;
@@ -64,6 +65,8 @@ final class Testing {
 
     public static final String API_KEY = Dotenv.load().get("API_KEY");
     public static final CurseForgeAPI CF_API = new CurseForgeAPI(API_KEY);
+    
+    private static final int MOD_ID = 570544;
 
     @Test
     void categoryShouldExist() throws CurseForgeException {
@@ -84,7 +87,7 @@ final class Testing {
     void tryDownloadFile() throws CurseForgeException, IOException {
         final var helper = CF_API.getHelper();
 
-        final var optionalFiles = helper.getModFiles(570544);
+        final var optionalFiles = helper.getModFiles(MOD_ID);
         assertThat(optionalFiles).isPresent();
 
         final var files = optionalFiles.get();
@@ -205,6 +208,21 @@ final class Testing {
             .toList();
         
         assertThat(responses).hasSize(4);
+    }
+    
+    @Test
+    void testAsyncAnd() throws Exception {
+        final var asyncHelper = CF_API.getAsyncHelper();
+        final var responseOptional = asyncHelper.getMod(MOD_ID)
+            .and(CF_API.makeAsyncRequest(Requests.getModDescription(MOD_ID)))
+            .map(Pair::mapResponses)
+            .get();
+        
+        assertThat(responseOptional).isPresent();
+        responseOptional.get().accept((mod, description) -> {
+            assertThat(mod).isNotNull();
+            assertThat(description).isNotBlank();
+        });
     }
 
 }

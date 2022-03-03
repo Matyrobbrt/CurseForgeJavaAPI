@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nonnull;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.util.ExceptionFunction;
+import io.github.matyrobbrt.curseforgeapi.util.Pair;
 
 /**
  * An object used for async requests.
@@ -60,7 +61,7 @@ public final class AsyncRequest<T> {
     public static void setFutureExecutor(@Nonnull Executor executor) {
         futureExecutor = Objects.requireNonNull(executor);
     }
-    
+
     public static <T> AsyncRequest<T> empty() {
         return new AsyncRequest<>(() -> CompletableFuture.failedFuture(null));
     }
@@ -131,14 +132,38 @@ public final class AsyncRequest<T> {
                 try {
                     @SuppressWarnings("unused")
                     final var castException = (E) e;
-                } catch (ClassCastException cc) {  // exception is not of the type we wanted
-                    if (e instanceof RuntimeException er) {
-                        throw er;
-                    }
+                } catch (ClassCastException cc) { // exception is not of the type we wanted
+                    if (e instanceof RuntimeException er) { throw er; }
                 }
                 return CompletableFuture.failedFuture(e);
             }
         }));
+    }
+
+    /**
+     * Merges this request with the {@code other} one, making the new type of the
+     * request a {@link Pair}.
+     * 
+     * @param  <U>   the type of the other request
+     * @param  other the request to merge with
+     * @return       a new request, whose type is a {@link Pair} of {@code T} and
+     *               {@code U}
+     */
+    public <U> AsyncRequest<Pair<T, U>> and(@Nonnull AsyncRequest<U> other) {
+        return new AsyncRequest<>(() -> future.get().thenCombine(other.future.get(), Pair::of));
+    }
+
+    /**
+     * Completes this request by blocking the current thread until the value is
+     * returned, and then returning it.
+     * 
+     * @return                      the value returned by the request
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @SuppressWarnings("unchecked")
+    public T get() throws InterruptedException, ExecutionException {
+        return (T) future.get().get();
     }
 
     /**
