@@ -60,8 +60,10 @@ import io.github.matyrobbrt.curseforgeapi.schemas.file.FileReleaseType;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.FileStatus;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModStatus;
+import io.github.matyrobbrt.curseforgeapi.util.Constants;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 import io.github.matyrobbrt.curseforgeapi.util.Utils;
+import io.github.matyrobbrt.curseforgeapi.util.Constants.GameIDs;
 import io.github.matyrobbrt.curseforgeapi.util.gson.CFSchemaEnumTypeAdapter;
 import io.github.matyrobbrt.curseforgeapi.util.gson.RecordTypeAdapterFactory;
 
@@ -82,7 +84,7 @@ public class CurseForgeAPI {
     private final HttpClient httpClient;
     private final Gson gson;
     private final Logger logger;
-    
+
     private final RequestHelper helper = new RequestHelper(this);
     private final AsyncRequestHelper asyncHelper = new AsyncRequestHelper(this);
 
@@ -105,6 +107,10 @@ public class CurseForgeAPI {
         
         this.gson = gsonBuilder.create();
         this.logger = LoggerFactory.getLogger(getClass());
+        
+        if (!isAuthorized()) {
+            throw new IllegalArgumentException("Invalid API Key!");
+        }
     }
     //@formatter:on
 
@@ -113,38 +119,60 @@ public class CurseForgeAPI {
         this.httpClient = httpClient;
         this.gson = gson;
         this.logger = logger;
+        if (!isAuthorized()) throw new IllegalArgumentException("Invalid API Key!");
     }
-    
+
+    /**
+     * Makes a simple request to the CurseForge API, to check if the API Key is
+     * valid.
+     * 
+     * @returns {@code false} if the request responds with the status code
+     *          {@link Constants.StatusCodes#UNAUTHORIZED},
+     *          {@link Constants.StatusCodes#FORBIDDEN}, or the request encountered
+     *          an exception.
+     */
+    public boolean isAuthorized() {
+        try {
+            final var statusCode = makeRequest(Requests.getGame(GameIDs.MINECRAFT)).getStatusCode();
+            return statusCode != Constants.StatusCodes.UNAUTHORIZED && statusCode != Constants.StatusCodes.FORBIDDEN;
+        } catch (CurseForgeException e) {
+            logger.error("Could not check if the API Key is valid due to an exception.", e);
+            return false;
+        }
+    }
+
     public Gson getGson() {
         return gson;
     }
-    
+
     public Logger getLogger() {
         return logger;
     }
-    
+
     public HttpClient getHttpClient() {
         return httpClient;
     }
-    
+
     public String getApiKey() {
         return apiKey;
     }
 
     /**
-     * @return the helper used for direct requests, without going through {@link Requests} first
+     * @return the helper used for direct requests, without going through
+     *         {@link Requests} first
      */
     public RequestHelper getHelper() {
         return helper;
     }
-    
+
     /**
-     * @return the helper used for direct async requests, without going through {@link Requests} first
+     * @return the helper used for direct async requests, without going through
+     *         {@link Requests} first
      */
     public AsyncRequestHelper getAsyncHelper() {
         return asyncHelper;
     }
-    
+
     /**
      * Sends a <b>blocking</b> request to the API
      * 
@@ -177,8 +205,8 @@ public class CurseForgeAPI {
                     .header("x-api-key", apiKey);
                 r = switch (genericRequest.method()) {
                 case GET -> r.GET();
-                case POST -> r.POST(BodyPublishers.ofString(genericRequest.body().toString()))
-                    .header("Content-Type", "application/json");
+                case POST -> r.POST(BodyPublishers.ofString(genericRequest.body().toString())).header("Content-Type",
+                    "application/json");
                 case PUT -> r.PUT(BodyPublishers.ofString(genericRequest.body().toString()));
                 };
                 return r;
@@ -233,15 +261,15 @@ public class CurseForgeAPI {
                     .header("x-api-key", apiKey);
                 r = switch (genericRequest.method()) {
                 case GET -> r.GET();
-                case POST -> r.POST(BodyPublishers.ofString(genericRequest.body().toString()))
-                    .header("Content-Type", "application/json");
+                case POST -> r.POST(BodyPublishers.ofString(genericRequest.body().toString())).header("Content-Type",
+                    "application/json");
                 case PUT -> r.PUT(BodyPublishers.ofString(genericRequest.body().toString()));
                 };
                 return r;
             }).build();
             return new AsyncRequest<>(() -> httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
-                .thenApply(response -> Response.ofNullableAndStatusCode(gson.fromJson(response.body(), JsonObject.class),
-                    response.statusCode())));
+                .thenApply(response -> Response
+                    .ofNullableAndStatusCode(gson.fromJson(response.body(), JsonObject.class), response.statusCode())));
         } catch (Exception e) {
             throw new CurseForgeException(e);
         }

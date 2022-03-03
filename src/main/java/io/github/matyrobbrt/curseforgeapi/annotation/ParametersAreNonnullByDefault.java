@@ -27,11 +27,10 @@
 
 package io.github.matyrobbrt.curseforgeapi.annotation;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-@Retention(RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface ParametersAreNonnullByDefault {
 
 }

@@ -65,7 +65,7 @@ import static org.assertj.core.api.Assertions.*;
 @SuppressWarnings("static-method")
 final class Testing {
 
-    public static final String API_KEY = Dotenv.load().get("API_KEY");
+    public static final String API_KEY = Dotenv.load().get("API_KEY", "");
     public static final CurseForgeAPI CF_API = new CurseForgeAPI(API_KEY);
     
     private static final int MOD_ID = 570544;
