@@ -248,12 +248,16 @@ public final class Response<T> {
      * @param  orElse the value to return is the value is not present
      * @return        the mapped value
      */
-    public <U> U mapOrElseWithException(Function<? super T, ? extends U> mapper, Supplier<U> orElse) {
+    public <U> U mapOrElseWithException(Function<? super T, ? extends U> mapper, Supplier<U> orElse) throws Exception {
         Objects.requireNonNull(mapper);
-        if (!isPresent()) {
-            return mapper.apply(value);
-        } else {
-            return orElse.get();
+        try {
+            if (!isPresent()) {
+                return mapper.apply(value);
+            } else {
+                return orElse.get();
+            }
+        } catch (Exception e) {
+            throw e;
         }
     }
 
