@@ -246,14 +246,22 @@ public final class Response<T> {
      * @param  <U>    the type of the new value
      * @param  mapper the mapper if the value is present
      * @param  orElse the value to return is the value is not present
-     * @return        the mapped value
+     * @return        the mapped value, or {@code null} if an exception occured
      */
-    public <U> U mapOrElseWithException(Function<? super T, ? extends U> mapper, Supplier<U> orElse) throws Exception {
-        Objects.requireNonNull(mapper);
-        if (isPresent()) {
-            return mapper.apply(value);
-        } else {
-            return orElse.get();
+    @Nullable
+    public <U> U mapOrElseWithException(ExceptionFunction<? super T, ? extends U, ?> mapper, ExceptionSupplier<U, ?> orElse) {
+        try {
+            Objects.requireNonNull(mapper);
+            if (isPresent()) {
+                return mapper.apply(value);
+            } else {
+                return orElse.get();
+            }
+        } catch (Exception e) {
+            if (e instanceof RuntimeException re) {
+                throw re;
+            }
+            return null;
         }
     }
 
