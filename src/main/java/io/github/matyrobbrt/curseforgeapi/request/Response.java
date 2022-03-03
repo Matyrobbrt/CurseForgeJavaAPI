@@ -229,7 +229,7 @@ public final class Response<T> {
      */
     public <U> U mapOrElse(Function<? super T, ? extends U> mapper, Supplier<U> orElse) {
         Objects.requireNonNull(mapper);
-        if (!isPresent()) {
+        if (isPresent()) {
             return mapper.apply(value);
         } else {
             return orElse.get();
@@ -250,14 +250,10 @@ public final class Response<T> {
      */
     public <U> U mapOrElseWithException(Function<? super T, ? extends U> mapper, Supplier<U> orElse) throws Exception {
         Objects.requireNonNull(mapper);
-        try {
-            if (!isPresent()) {
-                return mapper.apply(value);
-            } else {
-                return orElse.get();
-            }
-        } catch (Exception e) {
-            throw e;
+        if (isPresent()) {
+            return mapper.apply(value);
+        } else {
+            return orElse.get();
         }
     }
 
