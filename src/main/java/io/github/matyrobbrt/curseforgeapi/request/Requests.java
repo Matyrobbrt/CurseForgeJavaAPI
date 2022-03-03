@@ -34,14 +34,18 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import io.github.matyrobbrt.curseforgeapi.annotation.Nonnull;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
 import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.GetFuzzyMatchesQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.Query;
 import io.github.matyrobbrt.curseforgeapi.schemas.Category;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
+import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintFuzzyMatch;
+import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintsMatchesResult;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.GameVersionType;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.GameVersionsByType;
@@ -297,6 +301,41 @@ public final class Requests {
             Types.STRING);
     }
 
+    /**********************************
+     * 
+     * Fingerprints
+     *
+     ***********************************/
+
+    /**
+     * Get mod files that match a list of fingerprints.
+     * 
+     * @param  fingerprints the fingerprints to search for
+     * @return              the request
+     */
+    public static Request<FingerprintsMatchesResult> getFingerprintMatches(int... fingerprints) {
+        final var jObj = new JsonObject();
+        final var array = new JsonArray();
+        for (var f : fingerprints) {
+            array.add(f);
+        }
+        jObj.add("fingerprints", array);
+        return new Request<>("/v1/fingerprints", Method.POST, jObj, "data", Types.FINGERPRINTS_MATCHES);
+    }
+
+    /**
+     * Get mod files that match a list of fingerprints using fuzzy matching.
+     * 
+     * @param  query the query to search for
+     * @return       the request
+     */
+    public static Request<List<FingerprintFuzzyMatch>> getFingerprintsFuzzyMatches(
+        @Nonnull GetFuzzyMatchesQuery query) {
+        return new Request<>("/v1/fingerprints/fuzzy", Method.POST, query.toJson(),
+            (gson, json) -> gson.fromJson(json.get("data").getAsJsonObject().get("fuzzyMatches").getAsJsonArray(),
+                Types.FINGERPRINTS_FUZY_MATCH_LIST));
+    }
+
     public static String format(String str, @Nullable Query query) {
         return format(str, query == null ? null : query.toArgs());
     }
@@ -321,6 +360,9 @@ public final class Requests {
         
         public static final Type FILE = new TypeToken<File>() {}.getType();
         public static final Type FILE_LIST = new TypeToken<List<File>>() {}.getType();
+        
+        public static final Type FINGERPRINTS_MATCHES = new TypeToken<FingerprintsMatchesResult>() {}.getType();
+        public static final Type FINGERPRINTS_FUZY_MATCH_LIST = new TypeToken<List<FingerprintFuzzyMatch>>() {}.getType();
         
         public static final Type STRING = new TypeToken<String>() {}.getType();
     }

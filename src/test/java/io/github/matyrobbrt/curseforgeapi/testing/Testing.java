@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -41,6 +42,7 @@ import io.github.matyrobbrt.curseforgeapi.request.Response;
 import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery.SortField;
+import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintsMatchesResult;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
 import io.github.matyrobbrt.curseforgeapi.util.Constants;
@@ -222,6 +224,33 @@ final class Testing {
         responseOptional.get().accept((mod, description) -> {
             assertThat(mod).isNotNull();
             assertThat(description).isNotBlank();
+        });
+    }
+    
+    @Test
+    void filesWithFingerprintExist() throws Exception {
+        final var helper = CF_API.getHelper();
+        
+        final var filesResponse = helper.getModFiles(MOD_ID);
+        assertThat(filesResponse).isPresent()
+            .get()
+            .asList()
+            .isNotEmpty();
+        
+        final var files = filesResponse.get();
+        assertThat(
+            CF_API.makeRequest(Requests.getFingerprintMatches(
+                IntStream
+                    .range(0, files.size())
+                    .map(i -> files.get(i).fileFingerprint()).toArray()
+            ))    
+        ).isNotEmpty()
+        .get()
+        .satisfies(new Condition<FingerprintsMatchesResult>() {
+            @Override
+            public boolean matches(FingerprintsMatchesResult value) {
+                return value.exactMatches().size() == files.size();
+            };
         });
     }
 

@@ -62,8 +62,12 @@ public final class AsyncRequest<T> {
         futureExecutor = Objects.requireNonNull(executor);
     }
 
+    /**
+     * @param <T>
+     * @return an empty async request
+     */
     public static <T> AsyncRequest<T> empty() {
-        return new AsyncRequest<>(() -> CompletableFuture.failedFuture(null));
+        return new AsyncRequest<>(() -> CompletableFuture.failedFuture(new IllegalArgumentException()));
     }
 
     private final Supplier<CompletableFuture<? super T>> future;
