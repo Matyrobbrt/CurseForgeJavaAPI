@@ -173,7 +173,7 @@ final class Testing {
     
     @Test
     void minecraftShouldExist() throws CurseForgeException {
-        final Response<List<Game>> gamesResponse = CF_API.makeRequest(Requests.getGames());
+        final Response<List<Game>> gamesResponse = CF_API.makeRequest(getGames());
         assertThat(gamesResponse).isPresent();
         
         final List<Game> games = gamesResponse.get();
@@ -182,7 +182,7 @@ final class Testing {
     
     @Test
     void gamesHaveCategories() throws CurseForgeException {
-        final Response<List<Game>> gamesResponse = CF_API.makeRequest(Requests.getGames());
+        final Response<List<Game>> gamesResponse = CF_API.makeRequest(getGames());
         assertThat(gamesResponse).isPresent();
         
         for (final Game game : gamesResponse.get()) {
@@ -216,7 +216,7 @@ final class Testing {
     void testAsyncAnd() throws Exception {
         final var asyncHelper = CF_API.getAsyncHelper();
         final var responseOptional = asyncHelper.getMod(MOD_ID)
-            .and(CF_API.makeAsyncRequest(Requests.getModDescription(MOD_ID)))
+            .and(CF_API.makeAsyncRequest(getModDescription(MOD_ID)))
             .map(Pair::mapResponses)
             .get();
         
@@ -239,7 +239,7 @@ final class Testing {
         
         final var files = filesResponse.get();
         assertThat(
-            CF_API.makeRequest(Requests.getFingerprintMatches(
+            CF_API.makeRequest(getFingerprintMatches(
                 IntStream
                     .range(0, files.size())
                     .map(i -> files.get(i).fileFingerprint()).toArray()

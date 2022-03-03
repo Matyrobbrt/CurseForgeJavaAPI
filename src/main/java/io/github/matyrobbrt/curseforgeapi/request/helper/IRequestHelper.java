@@ -27,50 +27,148 @@
 
 package io.github.matyrobbrt.curseforgeapi.request.helper;
 
+import io.github.matyrobbrt.curseforgeapi.annotation.Nonnull;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
+import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.GetFuzzyMatchesQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 
 @ParametersAreNonnullByDefault
 public interface IRequestHelper {
-    
+
+    /**********************************
+     * 
+     * Games
+     *
+     ***********************************/
+
     /**
-     * @see Requests#getModFile(int, int)
+     * @see Requests#getGame(int)
      */
-    Object getModFile(int modId, int fileId) throws CurseForgeException;
-    
+    Object getGame(int gameId) throws CurseForgeException;
+
     /**
-     * @see Requests#getModFiles(int)
+     * @see Requests#getGames()
      */
-    Object getModFiles(int modId) throws CurseForgeException;
-    
+    Object getGames() throws CurseForgeException;
+
     /**
-     * @see Requests#getModFiles(int, Integer, PaginationQuery)
+     * @see Requests#getGames(PaginationQuery)
      */
-    Object getModFiles(int modId, @Nullable Integer gameVersionTypeId,
-        @Nullable PaginationQuery paginationQuery) throws CurseForgeException;
-    
+    Object getGames(@Nullable PaginationQuery paginationQuery) throws CurseForgeException;
+
     /**
-     * @see Requests#searchMods(ModSearchQuery)
+     * @see Requests#getGameVersions(int)
      */
-    Object searchMods(ModSearchQuery query) throws CurseForgeException;
-    
+    Object getGameVersions(int gameId) throws CurseForgeException;
+
+    /**
+     * @see Requests#getGameVersionTypes(int)
+     */
+    Object getGameVersionTypes(int gameId) throws CurseForgeException;
+
+    /**********************************
+     * 
+     * Categories
+     *
+     ***********************************/
+
     /**
      * @see Requests#getCategories(int)
      */
     Object getCategories(int gameId) throws CurseForgeException;
-    
+
     /**
      * @see Requests#getCategories(int, int)
      */
     Object getCategories(int gameId, int classId) throws CurseForgeException;
-    
+
+    /**********************************
+     * 
+     * Mods
+     *
+     ***********************************/
+
     /**
      * @see Requests#getMod(int)
      */
     Object getMod(int modId) throws CurseForgeException;
-    
+
+    /**
+     * @see Requests#getModDescription(int)
+     */
+    Object getModDescription(int modId) throws CurseForgeException;
+
+    /**
+     * @see Requests#searchMods(ModSearchQuery)
+     */
+    Object searchMods(ModSearchQuery query) throws CurseForgeException;
+
+    /**
+     * @see Requests#getFeaturedMods(FeaturedModsQuery)
+     */
+    Object getFeaturedMods(FeaturedModsQuery query) throws CurseForgeException;
+
+    /**********************************
+     * 
+     * Files
+     *
+     ***********************************/
+
+    /**
+     * @see Requests#getModFile(int, int)
+     */
+    Object getModFile(int modId, int fileId) throws CurseForgeException;
+
+    /**
+     * @see Requests#getModFiles(int)
+     */
+    Object getModFiles(int modId) throws CurseForgeException;
+
+    /**
+     * @see Requests#getModFiles(int, Integer, PaginationQuery)
+     */
+    Object getModFiles(int modId, @Nullable Integer gameVersionTypeId, @Nullable PaginationQuery paginationQuery)
+        throws CurseForgeException;
+
+    /**
+     * @see Requests#getModFiles(Mod)
+     */
+    Object getModFiles(Mod mod) throws CurseForgeException;
+
+    /**
+     * @see Requests#getFiles(int...)
+     */
+    Object getFiles(int... fileIds) throws CurseForgeException;
+
+    /**
+     * @see Requests#getModFileChangelog(int, int)
+     */
+    Object getModFileChangelog(int modId, int fileId) throws CurseForgeException;
+
+    /**
+     * @see Requests#getModFileDownloadURL(int, int)
+     */
+    Object getModFileDownloadURL(int modId, int fileId) throws CurseForgeException;
+
+    /**********************************
+     * 
+     * Fingerprints
+     *
+     ***********************************/
+
+    /**
+     * @see Requests#getFingerprintMatches(int...)
+     */
+    Object getFingerprintMatches(int... fingerprints) throws CurseForgeException;
+
+    /**
+     * @see Requests#getFingerprintsFuzzyMatches(GetFuzzyMatchesQuery)
+     */
+    Object getFingerprintsFuzzyMatches(@Nonnull GetFuzzyMatchesQuery query) throws CurseForgeException;
 }

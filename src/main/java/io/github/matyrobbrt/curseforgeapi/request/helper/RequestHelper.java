@@ -31,12 +31,21 @@ import java.util.List;
 
 import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
+import io.github.matyrobbrt.curseforgeapi.request.Request;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.request.Response;
+import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.GetFuzzyMatchesQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
 import io.github.matyrobbrt.curseforgeapi.schemas.Category;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
+import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintFuzzyMatch;
+import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintsMatchesResult;
+import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
+import io.github.matyrobbrt.curseforgeapi.schemas.game.GameVersionType;
+import io.github.matyrobbrt.curseforgeapi.schemas.game.GameVersionsByType;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.FeaturedMods;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 
@@ -109,6 +118,114 @@ public class RequestHelper implements IRequestHelper {
     @Override
     public Response<List<Mod>> searchMods(ModSearchQuery query) throws CurseForgeException {
         return api.makeRequest(Requests.searchMods(query));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<Game> getGame(int gameId) throws CurseForgeException {
+        return mr(Requests.getGame(gameId));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<List<Game>> getGames() throws CurseForgeException {
+        return mr(Requests.getGames());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<List<Game>> getGames(PaginationQuery paginationQuery) throws CurseForgeException {
+        return mr(Requests.getGames(paginationQuery));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<List<GameVersionsByType>> getGameVersions(int gameId) throws CurseForgeException {
+        return mr(Requests.getGameVersions(gameId));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<List<GameVersionType>> getGameVersionTypes(int gameId) throws CurseForgeException {
+        return mr(Requests.getGameVersionTypes(gameId));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<String> getModDescription(int modId) throws CurseForgeException {
+        return mr(Requests.getModDescription(modId));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<FeaturedMods> getFeaturedMods(FeaturedModsQuery query) throws CurseForgeException {
+        return mr(Requests.getFeaturedMods(query));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<List<File>> getModFiles(Mod mod) throws CurseForgeException {
+        return mr(Requests.getModFiles(mod));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<List<File>> getFiles(int... fileIds) throws CurseForgeException {
+        return mr(Requests.getFiles(fileIds));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<String> getModFileChangelog(int modId, int fileId) throws CurseForgeException {
+        return mr(Requests.getModFileChangelog(modId, fileId));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<String> getModFileDownloadURL(int modId, int fileId) throws CurseForgeException {
+        return mr(Requests.getModFileDownloadURL(modId, fileId));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<FingerprintsMatchesResult> getFingerprintMatches(int... fingerprints) throws CurseForgeException {
+        return mr(Requests.getFingerprintMatches(fingerprints));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Response<List<FingerprintFuzzyMatch>> getFingerprintsFuzzyMatches(GetFuzzyMatchesQuery query) throws CurseForgeException {
+        return mr(Requests.getFingerprintsFuzzyMatches(query));
+    }
+    
+    private <T> Response<T> mr(Request<T> req) throws CurseForgeException {
+        return api.makeRequest(req);
     }
 
 }
