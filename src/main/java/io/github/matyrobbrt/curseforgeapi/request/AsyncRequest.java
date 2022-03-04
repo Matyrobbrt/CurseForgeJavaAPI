@@ -64,6 +64,45 @@ public final class AsyncRequest<T> {
     }
 
     /**
+     * Makes an {@link AsyncRequest} with the result asynchronously supplied by the
+     * {@code supplier}.
+     * 
+     * @param  <T>      the type of the request
+     * @param  supplier the supplier which supplies the value
+     * @return          the request
+     */
+    public static <T> AsyncRequest<T> of(@Nonnull Supplier<T> supplier) {
+        return new AsyncRequest<>(() -> CompletableFuture.supplyAsync(supplier));
+    }
+
+    /**
+     * Makes an {@link AsyncRequest} which has been completed with the provided
+     * {@code value}.
+     * 
+     * @param  <T>   the type of the request
+     * @param  value the value which the request will return
+     * @return       the request
+     */
+    public static <T> AsyncRequest<T> of(T value) {
+        return new AsyncRequest<>(() -> CompletableFuture.completedFuture(value));
+    }
+
+    /**
+     * Makes an {@link AsyncRequest} which if the provided {@code value} is null,
+     * has been failed with a {@link NullPointerException}, otherwise completed with
+     * the provided {@code value}.
+     * 
+     * @param  <T>   the type of the request
+     * @param  value the value which the request will return, or null to fail the
+     *               request with a {@link NullPointerException}
+     * @return       the request
+     */
+    public static <T> AsyncRequest<T> ofNullable(@Nullable T value) {
+        return new AsyncRequest<>(() -> value == null ? CompletableFuture.failedFuture(new EmptyRequestException())
+            : CompletableFuture.completedFuture(value));
+    }
+
+    /**
      * @param  <T>
      * @return     an empty async request
      */
