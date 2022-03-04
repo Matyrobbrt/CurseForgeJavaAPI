@@ -98,7 +98,7 @@ public final class AsyncRequest<T> {
      * @return       the request
      */
     public static <T> AsyncRequest<T> ofNullable(@Nullable T value) {
-        return new AsyncRequest<>(() -> value == null ? CompletableFuture.failedFuture(new EmptyRequestException())
+        return new AsyncRequest<>(() -> value == null ? CompletableFuture.failedFuture(new NullPointerException())
             : CompletableFuture.completedFuture(value));
     }
 
