@@ -41,9 +41,25 @@ public interface ExceptionFunction<T, R, E extends Exception> {
     /**
      * Applies this function to the given argument.
      *
-     * @param t the function argument
-     * @return the function result
+     * @param  t the function argument
+     * @return   the function result
      */
     R apply(T t) throws E;
-    
+
+    /**
+     * Applies this function to the given argument. Any caught exceptions will be
+     * rethrown.
+     *
+     * @param  t the function argument
+     * @return   the function result
+     */
+    default R applyNoException(T t) {
+        try {
+            return apply(t);
+        } catch (Throwable e) {
+            Utils.sneakyThrow(e);
+            return null;
+        }
+    }
+
 }

@@ -42,6 +42,7 @@ import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefau
 import io.github.matyrobbrt.curseforgeapi.util.Constants;
 import io.github.matyrobbrt.curseforgeapi.util.ExceptionFunction;
 import io.github.matyrobbrt.curseforgeapi.util.ExceptionSupplier;
+import io.github.matyrobbrt.curseforgeapi.util.Utils;
 
 /**
  * A response object which may or may not contain a value. Similar
@@ -241,15 +242,39 @@ public final class Response<T> {
      * return the supplied {@code orElse}. <br>
      * Opposed to {@link #mapOrElse(Function, Supplier)}, this method accepts an
      * {@link ExceptionFunction} and {@link ExceptionSupplier} for providing the
-     * mapper and the supplier.
+     * mapper and the supplier. <br>
+     * <strong>If an exception is caught, it will be rethrown using
+     * {@link Utils#sneakyThrow(Throwable)}. </strong>
      * 
      * @param  <U>    the type of the new value
      * @param  mapper the mapper if the value is present
      * @param  orElse the value to return is the value is not present
-     * @return        the mapped value, or {@code null} if an exception occured
+     * @return        the mapped value
      */
-    @Nullable
-    public <U> U mapOrElseWithException(ExceptionFunction<? super T, ? extends U, ?> mapper, ExceptionSupplier<U, ?> orElse) {
+    public <U> U mapOrElseWithException(ExceptionFunction<? super T, ? extends U, ?> mapper,
+        ExceptionSupplier<U, ?> orElse) {
+        return mapOrElseWithException(mapper, orElse, null);
+    }
+
+    /**
+     * Map the value inside the {@link Response} to another one if present, or else,
+     * return the supplied {@code orElse}. <br>
+     * Opposed to {@link #mapOrElse(Function, Supplier)}, this method accepts an
+     * {@link ExceptionFunction} and {@link ExceptionSupplier} for providing the
+     * mapper and the supplier. <br>
+     * 
+     * @param  <U>         the type of the new value
+     * @param  mapper      the mapper if the value is present
+     * @param  orElse      the value to return is the value is not present
+     * @param  onException the function to apply when an exception is thrown by
+     *                     either the {@code mapper} or the {@code orElse},
+     *                     providing the value returned in those cases. If this is
+     *                     {@code null}, the exception will be rethrown using
+     *                     {@link Utils#sneakyThrow(Throwable)}.
+     * @return             the mapped value
+     */
+    public <U> U mapOrElseWithException(ExceptionFunction<? super T, ? extends U, ?> mapper,
+        ExceptionSupplier<U, ?> orElse, @Nullable Function<Exception, U> onException) {
         try {
             Objects.requireNonNull(mapper);
             if (isPresent()) {
@@ -258,10 +283,12 @@ public final class Response<T> {
                 return orElse.get();
             }
         } catch (Exception e) {
-            if (e instanceof RuntimeException re) {
-                throw re;
+            if (onException == null) {
+                Utils.sneakyThrow(e);
+                return null; // This part should never be reached
+            } else {
+                return onException.apply(e);
             }
-            return null; // TODO maybe find a better way of handling the exception
         }
     }
 

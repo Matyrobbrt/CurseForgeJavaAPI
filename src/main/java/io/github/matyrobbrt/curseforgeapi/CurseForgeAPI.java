@@ -91,7 +91,10 @@ public class CurseForgeAPI {
     //@formatter:off
     public CurseForgeAPI(final String apiKey) {
         this.apiKey = apiKey;
-        this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+        this.httpClient = HttpClient
+            .newBuilder()
+            .connectTimeout(Duration.ofSeconds(5))
+            .build();
         
         final var gsonBuilder = new GsonBuilder()
             .setPrettyPrinting()
@@ -200,7 +203,7 @@ public class CurseForgeAPI {
         int statusCode = 0;
         try {
             final URL target = new URL(REQUEST_TARGET + genericRequest.endpoint());
-            final var httpRequest = Utils.<HttpRequest.Builder>makeWithSupplier(() -> {
+            final var httpRequest = Utils.makeWithSupplier(() -> {
                 var r = HttpRequest.newBuilder(URI.create(target.toString())).header("Accept", "application/json")
                     .header("x-api-key", apiKey);
                 r = switch (genericRequest.method()) {
@@ -256,7 +259,7 @@ public class CurseForgeAPI {
         throws CurseForgeException {
         try {
             final URL target = new URL(REQUEST_TARGET + genericRequest.endpoint());
-            final var httpRequest = Utils.<HttpRequest.Builder>makeWithSupplier(() -> {
+            final var httpRequest = Utils.makeWithSupplier(() -> {
                 var r = HttpRequest.newBuilder(URI.create(target.toString())).header("Accept", "application/json")
                     .header("x-api-key", apiKey);
                 r = switch (genericRequest.method()) {

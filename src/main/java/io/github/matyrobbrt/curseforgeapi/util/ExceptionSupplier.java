@@ -30,16 +30,18 @@ package io.github.matyrobbrt.curseforgeapi.util;
 /**
  * Represents a supplier of results, which may throw an exception.
  *
- * <p>There is no requirement that a new or distinct result be returned each
- * time the supplier is invoked.
+ * <p>
+ * There is no requirement that a new or distinct result be returned each time
+ * the supplier is invoked.
  *
- * <p>This is a <a href="package-summary.html">functional interface</a>
- * whose functional method is {@link #get()}.
+ * <p>
+ * This is a <a href="package-summary.html">functional interface</a> whose
+ * functional method is {@link #get()}.
  *
  * @param <T> the type of results supplied by this supplier
  * @param <E> the type of the exception thrown by this supplier
  */
-@FunctionalInterface
+@java.lang.FunctionalInterface
 public interface ExceptionSupplier<T, E extends Exception> {
 
     /**
@@ -48,5 +50,20 @@ public interface ExceptionSupplier<T, E extends Exception> {
      * @return a result
      */
     T get() throws E;
-    
+
+    /**
+     * Gets the result, and if an exception is encountered, it will be sneakily
+     * rethrown.
+     * 
+     * @return
+     */
+    default T getNoException() {
+        try {
+            return get();
+        } catch (Throwable e) {
+            Utils.sneakyThrow(e);
+            return null;
+        }
+    }
+
 }

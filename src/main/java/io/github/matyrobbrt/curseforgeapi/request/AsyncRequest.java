@@ -43,6 +43,7 @@ import io.github.matyrobbrt.curseforgeapi.annotation.Nonnull;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.util.ExceptionFunction;
 import io.github.matyrobbrt.curseforgeapi.util.Pair;
+import io.github.matyrobbrt.curseforgeapi.util.Utils;
 
 /**
  * An object used for async requests.
@@ -63,11 +64,11 @@ public final class AsyncRequest<T> {
     }
 
     /**
-     * @param <T>
-     * @return an empty async request
+     * @param  <T>
+     * @return     an empty async request
      */
     public static <T> AsyncRequest<T> empty() {
-        return new AsyncRequest<>(() -> CompletableFuture.failedFuture(new IllegalArgumentException()));
+        return new AsyncRequest<>(() -> CompletableFuture.failedFuture(new EmptyRequestException()));
     }
 
     private final Supplier<CompletableFuture<? super T>> future;
@@ -133,13 +134,8 @@ public final class AsyncRequest<T> {
             try {
                 return mapper.apply((T) o).future.get();
             } catch (Exception e) {
-                try {
-                    @SuppressWarnings("unused")
-                    final var castException = (E) e;
-                } catch (ClassCastException cc) { // exception is not of the type we wanted
-                    if (e instanceof RuntimeException er) { throw er; }
-                }
-                return CompletableFuture.failedFuture(e);
+                Utils.sneakyThrow(e);
+                return null; // theoretically, this will never be reached
             }
         }));
     }
@@ -190,27 +186,40 @@ public final class AsyncRequest<T> {
      * Queues the action for later completion.
      * 
      * @param onSuccess the consumer to run when the action succeeded
-     * @param onFailure the consumer to run when the action fails
+     * @param onFailure the consumer to run when the action fails, or is empty (it
+     *                  fails with the {@link EmptyRequestException})
      */
     @SuppressWarnings("unchecked")
     public void queue(@Nullable Consumer<? super T> onSuccess, @Nullable Consumer<? super Throwable> onFailure) {
         futureExecutor.execute(() -> {
             try {
-                future.get().whenComplete((o, t) -> {
+                final var tFuture = this.future.get().whenComplete((o, t) -> {
                     if (o != null && onSuccess != null) {
                         onSuccess.accept((T) o);
                     }
                     if (t != null && onFailure != null) {
                         onFailure.accept(t);
                     }
-                }).get(); // TODO Failed futures throw
+                });
+                while (!tFuture.isDone()) {
+                    Thread.sleep(100);
+                }
+                tFuture.get();
             } catch (ExecutionException e) {
-                LOGGER.error("Exception while awaiting request!", e);
+                if (onFailure != null) {
+                    onFailure.accept(e.getCause());
+                }
             } catch (InterruptedException e) {
                 LOGGER.error("InterruptedException while awaiting request!", e);
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    public static final class EmptyRequestException extends Exception {
+
+        private static final long serialVersionUID = 586245362476362933L;
+
     }
 
 }
