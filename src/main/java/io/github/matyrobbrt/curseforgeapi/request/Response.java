@@ -261,7 +261,7 @@ public final class Response<T> {
             if (e instanceof RuntimeException re) {
                 throw re;
             }
-            return null;
+            return null; // TODO maybe find a better way of handling the exception
         }
     }
 

@@ -203,7 +203,7 @@ public final class AsyncRequest<T> {
                     if (t != null && onFailure != null) {
                         onFailure.accept(t);
                     }
-                }).get();
+                }).get(); // TODO Failed futures throw
             } catch (ExecutionException e) {
                 LOGGER.error("Exception while awaiting request!", e);
             } catch (InterruptedException e) {

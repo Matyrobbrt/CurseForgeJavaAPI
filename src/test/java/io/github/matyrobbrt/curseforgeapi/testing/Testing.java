@@ -253,5 +253,19 @@ final class Testing {
             };
         });
     }
+    
+    @Test
+    void slugSearchWorks() throws CurseForgeException {
+        final var helper = CF_API.getHelper();
+        
+        final var modResponse = helper.getMod(MOD_ID);
+        assertThat(modResponse).isNotEmpty();
+        
+        final var mod = modResponse.get();
+        final var queryResponse = helper.searchMods(ModSearchQuery.of(mod.gameId())
+            .classId(mod.classId())
+            .slug(mod.slug()));
+        assertThat(queryResponse).isNotEmpty();
+    }
 
 }
