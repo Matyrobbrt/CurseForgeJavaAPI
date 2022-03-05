@@ -49,6 +49,7 @@ import io.github.matyrobbrt.curseforgeapi.util.Constants;
 import io.github.matyrobbrt.curseforgeapi.util.Constants.GameIDs;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
 import io.github.matyrobbrt.curseforgeapi.util.Pair;
+import io.github.matyrobbrt.curseforgeapi.util.Utils;
 
 import static io.github.matyrobbrt.curseforgeapi.request.Requests.*;
 import static io.github.matyrobbrt.curseforgeapi.testing.Assertions.*;
@@ -65,8 +66,13 @@ import static org.assertj.core.api.Assertions.*;
 @SuppressWarnings("static-method")
 final class Testing {
 
-    public static final String API_KEY = Dotenv.load().get("API_KEY", "");
-    public static final CurseForgeAPI CF_API = new CurseForgeAPI(API_KEY);
+    private static final Dotenv DOTENV = Dotenv.load();
+    public static final CurseForgeAPI CF_API = Utils.rethrowSupplier(() -> CurseForgeAPI
+        .builder()
+        .apiKey(DOTENV.get("API_KEY", ""))
+        .uploadApiToken(DOTENV.get("UPLOAD_API_TOKEN", ""))
+        .build())
+        .get();
     
     private static final int MOD_ID = 570544;
 

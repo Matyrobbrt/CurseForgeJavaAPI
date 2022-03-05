@@ -35,12 +35,20 @@ public final class CurseForgeException extends Exception {
         super(t);
     }
     
+    public CurseForgeException(String message) {
+        super(message);
+    }
+    
     public static final class Runtime extends RuntimeException {
 
         private static final long serialVersionUID = 5448653480458222551L;
         
         public Runtime(Throwable t) {
             super(t);
+        }
+        
+        public Runtime(String message) {
+            super(message);
         }
         
     }

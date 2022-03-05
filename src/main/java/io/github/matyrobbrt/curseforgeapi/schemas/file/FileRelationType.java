@@ -31,7 +31,19 @@ import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_FileRelationType")
 public enum FileRelationType {
-    EMBEDDED_LIBRARY, OPTIONAL_DEPENDENCY, REQUIRED_DEPENDENCY, TOOL, INCOMPATIBLE, INCLUDE;  
+
+    EMBEDDED_LIBRARY("embeddedLibrary"), OPTIONAL_DEPENDENCY("incompatible"), REQUIRED_DEPENDENCY("requiredDependency"),
+    TOOL("tool"), INCOMPATIBLE("incompatible"), INCLUDE("include"); // Include doesn't seem to exist on the Upload API
+
+    private final String uploadApiName;
+
+    private FileRelationType(String uploadApiName) {
+        this.uploadApiName = uploadApiName;
+    }
+
+    public String uploadApiName() {
+        return uploadApiName;
+    }
 
     public static FileRelationType byId(int id) {
         return values()[id - 1];
