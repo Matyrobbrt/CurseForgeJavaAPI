@@ -232,8 +232,8 @@ public class CurseForgeAPI {
      */
     public boolean isAuthorizedForUpload() {
         try {
-            final var statusCode = makeUploadApiRequest("minecraft", UploadApiRequests.getGameDependencies()).getStatusCode();
-            return statusCode != Constants.StatusCodes.UNAUTHORIZED && statusCode != Constants.StatusCodes.FORBIDDEN && statusCode != StatusCodes.NOT_FOUND;
+            final var statusCode = makeUploadApiRequest("minecraft", UploadApiRequests.getGameVersions()).getStatusCode();
+            return statusCode != Constants.StatusCodes.UNAUTHORIZED && statusCode != Constants.StatusCodes.FORBIDDEN;
         } catch (CurseForgeException e) {
             logger.error("Could not check if the Upload API Token is valid due to an exception.", e);
             return false;
@@ -410,8 +410,8 @@ public class CurseForgeAPI {
         try {
             final URL target = new URL(UPLOAD_REQUEST_TARGET.formatted(gameSlug) + request.endpoint());
             final var httpRequest = Utils.makeWithSupplier(() -> {
-                var r = HttpRequest.newBuilder(URI.create(target.toString())).header("Accept", "application/json")
-                    .header("X-Api-Token", uploadApiToken);
+                var r = HttpRequest.newBuilder(URI.create(target.toString())).header("X-Api-Token", uploadApiToken)
+                    .header("Content-Type", request.contentType() == null ? "application/json" : request.contentType());
                 r = switch (request.method()) {
                 case GET -> r.GET();
                 case POST -> r.POST(request.bodyPublisher());
@@ -422,6 +422,7 @@ public class CurseForgeAPI {
             final var response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             statusCode = response.statusCode();
             if (statusCode == StatusCodes.NOT_FOUND) {
+             // A 404 returns the request apparently?
                 return Response.empty(statusCode);
             }
             return Response.ofNullableAndStatusCode(gson.fromJson(response.body(), JsonElement.class), statusCode)

@@ -42,6 +42,10 @@ import io.github.matyrobbrt.curseforgeapi.request.Response;
 import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery.SortField;
+import io.github.matyrobbrt.curseforgeapi.request.uploadapi.UploadApiRequests;
+import io.github.matyrobbrt.curseforgeapi.request.uploadapi.UploadQuery;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.FileRelationType;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.FileReleaseType;
 import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintsMatchesResult;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
@@ -272,6 +276,15 @@ final class Testing {
             .classId(mod.classId())
             .slug(mod.slug()));
         assertThat(queryResponse).isNotEmpty();
+    }
+    
+    @Test
+    void tryUpload() throws CurseForgeException, IOException {
+        final var response = CF_API.makeUploadApiRequest("minecraft", 
+            UploadApiRequests.uploadFile(551821, UploadQuery
+                .make("hmmm", FileReleaseType.ALPHA)
+                .addRelation("mekanism", FileRelationType.REQUIRED_DEPENDENCY), Path.of("test.jar")));
+        assertThat(response).isPresent();
     }
 
 }

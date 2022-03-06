@@ -12,6 +12,11 @@ import io.github.matyrobbrt.curseforgeapi.request.Method;
 
 @ParametersAreNonnullByDefault
 public record UploadApiRequest<T> (String endpoint, Method method, @Nullable BodyPublisher bodyPublisher,
+    BiFunction<Gson, JsonElement, T> responseDecoder, @Nullable String contentType) {
+    
+    public UploadApiRequest(String endpoint, Method method, @Nullable BodyPublisher bodyPublisher,
     BiFunction<Gson, JsonElement, T> responseDecoder) {
+        this(endpoint, method, bodyPublisher, responseDecoder, null);
+    }
 
 }

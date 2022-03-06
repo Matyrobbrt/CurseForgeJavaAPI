@@ -69,8 +69,10 @@ public class UploadQuery {
         }
         {
             final var arr = new JsonArray();
-            for (final var i : gameVersions) {
-                arr.add(i);
+            if (gameVersions != null) {
+                for (final var i : gameVersions) {
+                    arr.add(i);
+                }
             }
             json.add("gameVersions", arr);
         }
