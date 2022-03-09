@@ -33,6 +33,8 @@ import io.github.matyrobbrt.curseforgeapi.schemas.Category;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
 
+import static io.github.matyrobbrt.curseforgeapi.util.Utils.encodeURL;
+
 /**
  * A builders for mod search queries.
  * 
@@ -197,7 +199,7 @@ public final class ModSearchQuery implements Query {
     @Override
     public Arguments toArgs() {
         return Arguments.of("gameId", gameId).put("classId", classId).put("categoryId", categoryId)
-            .put("gameVersion", gameVersion).put("searchFilter", searchFilter)
+            .put("gameVersion", encodeURL(gameVersion)).put("searchFilter", encodeURL(searchFilter))
             .put("sortField", sortField == null ? null : sortField.ordinal() + 1)
             .put("sortOrder", sortOrder == null ? null : sortOrder.toString())
             .put("modLoaderType", modLoaderType == null ? null : modLoaderType.ordinal() + 1)

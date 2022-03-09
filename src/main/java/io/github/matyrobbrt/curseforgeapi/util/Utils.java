@@ -27,6 +27,9 @@
 
 package io.github.matyrobbrt.curseforgeapi.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -35,6 +38,8 @@ import java.util.function.Supplier;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+
+import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 
 public final class Utils {
 
@@ -118,5 +123,23 @@ public final class Utils {
      */
     public static Runnable rethrowRunnable(final ExceptionRunnable<?> runnable) {
         return runnable;
+    }
+
+    /**
+     * Encodes a string for use in URL requests.
+     * 
+     * @param  value the string to encode
+     * @return       the encoded string. If {@code value} is null, this will be null
+     *               as well.
+     */
+    public static String encodeURL(@Nullable String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex.getCause());
+        }
     }
 }
