@@ -27,11 +27,9 @@
 
 package io.github.matyrobbrt.curseforgeapi.request;
 
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -41,9 +39,11 @@ import org.slf4j.LoggerFactory;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.Nonnull;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
+import io.github.matyrobbrt.curseforgeapi.request.async.EmptyAsyncRequest;
+import io.github.matyrobbrt.curseforgeapi.request.async.OfCompletableFutureAsyncRequest;
+import io.github.matyrobbrt.curseforgeapi.request.async.OfValueAsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.util.ExceptionFunction;
 import io.github.matyrobbrt.curseforgeapi.util.Pair;
-import io.github.matyrobbrt.curseforgeapi.util.Utils;
 
 /**
  * An object used for async requests.
@@ -52,15 +52,12 @@ import io.github.matyrobbrt.curseforgeapi.util.Utils;
  *
  * @param  <T> the response type
  */
-public final class AsyncRequest<T> {
+public interface AsyncRequest<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncRequest.class);
-    @Nonnull
-    private static Executor futureExecutor = Executors
-        .newSingleThreadExecutor(r -> new Thread(r, "AsyncRequestHandler"));
+    Logger LOGGER = LoggerFactory.getLogger(AsyncRequest.class);
 
-    public static void setFutureExecutor(@Nonnull Executor executor) {
-        futureExecutor = Objects.requireNonNull(executor);
+    static void setFutureExecutor(@Nonnull Executor executor) {
+        OfCompletableFutureAsyncRequest.setFutureExecutor(executor);
     }
 
     /**
@@ -72,7 +69,7 @@ public final class AsyncRequest<T> {
      * @return          the request
      */
     public static <T> AsyncRequest<T> of(@Nonnull Supplier<T> supplier) {
-        return new AsyncRequest<>(() -> CompletableFuture.supplyAsync(supplier));
+        return new OfCompletableFutureAsyncRequest<>(CompletableFuture.supplyAsync(supplier));
     }
 
     /**
@@ -84,7 +81,7 @@ public final class AsyncRequest<T> {
      * @return       the request
      */
     public static <T> AsyncRequest<T> of(T value) {
-        return new AsyncRequest<>(() -> CompletableFuture.completedFuture(value));
+        return new OfValueAsyncRequest<>(value);
     }
 
     /**
@@ -98,22 +95,16 @@ public final class AsyncRequest<T> {
      * @return       the request
      */
     public static <T> AsyncRequest<T> ofNullable(@Nullable T value) {
-        return new AsyncRequest<>(() -> value == null ? CompletableFuture.failedFuture(new NullPointerException())
-            : CompletableFuture.completedFuture(value));
+        return value == null ? empty() : of(value);
     }
 
     /**
      * @param  <T>
      * @return     an empty async request
      */
+    @SuppressWarnings("unchecked")
     public static <T> AsyncRequest<T> empty() {
-        return new AsyncRequest<>(() -> CompletableFuture.failedFuture(new EmptyRequestException()));
-    }
-
-    private final Supplier<CompletableFuture<? super T>> future;
-
-    public AsyncRequest(Supplier<CompletableFuture<? super T>> future) {
-        this.future = future;
+        return (AsyncRequest<T>) EmptyAsyncRequest.INSTANCE;
     }
 
     /**
@@ -124,11 +115,7 @@ public final class AsyncRequest<T> {
      * @return        the request
      */
     @Nonnull
-    @SuppressWarnings("unchecked")
-    public <U> AsyncRequest<U> map(@Nonnull Function<? super T, ? super U> mapper) {
-        return new AsyncRequest<>(
-            () -> future.get().thenCompose(o -> CompletableFuture.completedFuture(mapper.apply((T) o))));
-    }
+    <U> AsyncRequest<U> map(@Nonnull Function<? super T, ? extends U> mapper);
 
     /**
      * Intermediate operator that returns a modified {@link AsyncRequest}.
@@ -143,10 +130,7 @@ public final class AsyncRequest<T> {
      * @see            #map(Function)
      */
     @Nonnull
-    @SuppressWarnings("unchecked")
-    public <U> AsyncRequest<U> flatMap(@Nonnull Function<? super T, AsyncRequest<U>> mapper) {
-        return new AsyncRequest<>(() -> future.get().thenCompose(o -> mapper.apply((T) o).future.get()));
-    }
+    <U> AsyncRequest<U> flatMap(@Nonnull Function<? super T, ? extends AsyncRequest<U>> mapper);
 
     /**
      * Intermediate operator that returns a modified {@link AsyncRequest}. <br>
@@ -166,17 +150,9 @@ public final class AsyncRequest<T> {
      * @see            #map(Function)
      */
     @Nonnull
-    @SuppressWarnings("unchecked")
-    public <U, E extends Exception> AsyncRequest<U> flatMapWithException(
-        @Nonnull ExceptionFunction<? super T, AsyncRequest<U>, E> mapper) {
-        return new AsyncRequest<>(() -> future.get().thenCompose(o -> {
-            try {
-                return mapper.apply((T) o).future.get();
-            } catch (Exception e) {
-                Utils.sneakyThrow(e);
-                return null; // theoretically, this will never be reached
-            }
-        }));
+    default <U, E extends Exception> AsyncRequest<U> flatMapWithException(
+        @Nonnull ExceptionFunction<? super T, ? extends AsyncRequest<U>, E> mapper) {
+        return flatMap(mapper::applyNoException);
     }
 
     /**
@@ -188,9 +164,8 @@ public final class AsyncRequest<T> {
      * @return       a new request, whose type is a {@link Pair} of {@code T} and
      *               {@code U}
      */
-    public <U> AsyncRequest<Pair<T, U>> and(@Nonnull AsyncRequest<U> other) {
-        return new AsyncRequest<>(() -> future.get().thenCombine(other.future.get(), Pair::of));
-    }
+    @Nonnull
+    <U> AsyncRequest<Pair<T, U>> and(@Nonnull AsyncRequest<U> other);
 
     /**
      * Completes this request by blocking the current thread until the value is
@@ -200,15 +175,13 @@ public final class AsyncRequest<T> {
      * @throws InterruptedException
      * @throws ExecutionException
      */
-    @SuppressWarnings("unchecked")
-    public T get() throws InterruptedException, ExecutionException {
-        return (T) future.get().get();
-    }
+    @Nullable
+    T get() throws InterruptedException, ExecutionException;
 
     /**
      * Queues the action for later completion.
      */
-    public void queue() {
+    default void queue() {
         queue(null, null);
     }
 
@@ -217,7 +190,7 @@ public final class AsyncRequest<T> {
      * 
      * @param onSuccess the consumer to run when the action succeeded
      */
-    public void queue(@Nullable Consumer<? super T> onSuccess) {
+    default void queue(@Nullable Consumer<? super T> onSuccess) {
         queue(onSuccess, null);
     }
 
@@ -228,32 +201,7 @@ public final class AsyncRequest<T> {
      * @param onFailure the consumer to run when the action fails, or is empty (it
      *                  fails with the {@link EmptyRequestException})
      */
-    @SuppressWarnings("unchecked")
-    public void queue(@Nullable Consumer<? super T> onSuccess, @Nullable Consumer<? super Throwable> onFailure) {
-        futureExecutor.execute(() -> {
-            try {
-                final var tFuture = this.future.get().whenComplete((o, t) -> {
-                    if (o != null && onSuccess != null) {
-                        onSuccess.accept((T) o);
-                    }
-                    if (t != null && onFailure != null) {
-                        onFailure.accept(t);
-                    }
-                });
-                while (!tFuture.isDone()) {
-                    Thread.sleep(100);
-                }
-                tFuture.get();
-            } catch (ExecutionException e) {
-                if (onFailure != null) {
-                    onFailure.accept(e.getCause());
-                }
-            } catch (InterruptedException e) {
-                LOGGER.error("InterruptedException while awaiting request!", e);
-                throw new RuntimeException(e);
-            }
-        });
-    }
+    void queue(@Nullable Consumer<? super T> onSuccess, @Nullable Consumer<? super Throwable> onFailure);
 
     public static final class EmptyRequestException extends Exception {
 

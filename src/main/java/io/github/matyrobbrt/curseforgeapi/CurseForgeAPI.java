@@ -58,6 +58,7 @@ import io.github.matyrobbrt.curseforgeapi.request.GenericRequest;
 import io.github.matyrobbrt.curseforgeapi.request.Request;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.request.Response;
+import io.github.matyrobbrt.curseforgeapi.request.async.OfHttpResponseAsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.helper.AsyncRequestHelper;
 import io.github.matyrobbrt.curseforgeapi.request.helper.RequestHelper;
 import io.github.matyrobbrt.curseforgeapi.request.uploadapi.UploadApiRequest;
@@ -376,7 +377,7 @@ public class CurseForgeAPI {
                 };
                 return r;
             }).build();
-            return new AsyncRequest<>(() -> httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
+            return new OfHttpResponseAsyncRequest<>(httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> Response
                     .ofNullableAndStatusCode(gson.fromJson(response.body(), JsonObject.class), response.statusCode())));
         } catch (Exception e) {
@@ -470,7 +471,7 @@ public class CurseForgeAPI {
                 };
                 return r;
             }).build();
-            return new AsyncRequest<>(() -> httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
+            return new OfHttpResponseAsyncRequest<>(httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> Response
                     // A 404 returns the request apparently?
                     .ofNullableAndStatusCode(response.statusCode() == StatusCodes.NOT_FOUND ? null : gson.fromJson(response.body(), JsonElement.class), response.statusCode())
