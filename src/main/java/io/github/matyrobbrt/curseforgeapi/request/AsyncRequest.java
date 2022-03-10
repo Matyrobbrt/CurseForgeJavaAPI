@@ -27,6 +27,7 @@
 
 package io.github.matyrobbrt.curseforgeapi.request;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -39,11 +40,14 @@ import org.slf4j.LoggerFactory;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.Nonnull;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
+import io.github.matyrobbrt.curseforgeapi.request.async.AsyncRequestValues;
 import io.github.matyrobbrt.curseforgeapi.request.async.EmptyAsyncRequest;
+import io.github.matyrobbrt.curseforgeapi.request.async.FlatMapAsyncRequest;
+import io.github.matyrobbrt.curseforgeapi.request.async.MapAsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.async.OfCompletableFutureAsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.async.OfValueAsyncRequest;
+import io.github.matyrobbrt.curseforgeapi.request.async.PairAsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.util.ExceptionFunction;
-import io.github.matyrobbrt.curseforgeapi.util.Pair;
 
 /**
  * An object used for async requests.
@@ -57,7 +61,11 @@ public interface AsyncRequest<T> {
     Logger LOGGER = LoggerFactory.getLogger(AsyncRequest.class);
 
     static void setFutureExecutor(@Nonnull Executor executor) {
-        OfCompletableFutureAsyncRequest.setFutureExecutor(executor);
+        AsyncRequestValues.setFutureExecutor(executor);
+    }
+
+    static void setDefaultFailure(final Consumer<? super Throwable> callback) {
+        AsyncRequestValues.setDefaultFailure(callback);
     }
 
     /**
@@ -115,7 +123,9 @@ public interface AsyncRequest<T> {
      * @return        the request
      */
     @Nonnull
-    <U> AsyncRequest<U> map(@Nonnull Function<? super T, ? extends U> mapper);
+    default <U> AsyncRequest<U> map(@Nonnull Function<? super T, ? extends U> mapper) {
+        return new MapAsyncRequest<>(this, Objects.requireNonNull(mapper));
+    }
 
     /**
      * Intermediate operator that returns a modified {@link AsyncRequest}.
@@ -130,7 +140,9 @@ public interface AsyncRequest<T> {
      * @see            #map(Function)
      */
     @Nonnull
-    <U> AsyncRequest<U> flatMap(@Nonnull Function<? super T, ? extends AsyncRequest<U>> mapper);
+    default <U> AsyncRequest<U> flatMap(@Nonnull Function<? super T, ? extends AsyncRequest<U>> mapper) {
+        return new FlatMapAsyncRequest<>(this, Objects.requireNonNull(mapper));
+    }
 
     /**
      * Intermediate operator that returns a modified {@link AsyncRequest}. <br>
@@ -156,16 +168,16 @@ public interface AsyncRequest<T> {
     }
 
     /**
-     * Merges this request with the {@code other} one, making the new type of the
-     * request a {@link Pair}.
+     * Merges this request with the {@code other} one.
      * 
      * @param  <U>   the type of the other request
      * @param  other the request to merge with
-     * @return       a new request, whose type is a {@link Pair} of {@code T} and
-     *               {@code U}
+     * @return       a new {@link DoubleAsyncRequest}, containg the 2 requests.
      */
     @Nonnull
-    <U> AsyncRequest<Pair<T, U>> and(@Nonnull AsyncRequest<U> other);
+    default <U> DoubleAsyncRequest<T, U> and(@Nonnull AsyncRequest<U> other) {
+        return new PairAsyncRequest<>(this, Objects.requireNonNull(other));
+    }
 
     /**
      * Completes this request by blocking the current thread until the value is
@@ -182,7 +194,7 @@ public interface AsyncRequest<T> {
      * Queues the action for later completion.
      */
     default void queue() {
-        queue(null, null);
+        queue(null, AsyncRequestValues.getDefaultFailure());
     }
 
     /**
@@ -191,7 +203,7 @@ public interface AsyncRequest<T> {
      * @param onSuccess the consumer to run when the action succeeded
      */
     default void queue(@Nullable Consumer<? super T> onSuccess) {
-        queue(onSuccess, null);
+        queue(onSuccess, AsyncRequestValues.getDefaultFailure());
     }
 
     /**

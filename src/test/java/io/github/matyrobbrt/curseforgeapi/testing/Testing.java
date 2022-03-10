@@ -238,6 +238,18 @@ final class Testing {
     }
     
     @Test
+    void testAsyncAdd2() throws Exception {
+        final var asyncHelper = CF_API.getAsyncHelper();
+        final var r = asyncHelper.getMod(MOD_ID)
+            .and(CF_API.makeAsyncRequest(getModDescription(MOD_ID)))
+            .get();
+        r.accept((r1, r2) -> {
+           assertThat(r1).isPresent();
+           assertThat(r2).isPresent();
+        });
+    }
+    
+    @Test
     void filesWithFingerprintExist() throws Exception {
         final var helper = CF_API.getHelper();
         

@@ -27,34 +27,44 @@
 
 package io.github.matyrobbrt.curseforgeapi.request.async;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.Nonnull;
-import io.github.matyrobbrt.curseforgeapi.request.AsyncRequest;
 
-public record OfHttpResponseAsyncRequest<T> (@Nonnull CompletableFuture<T> future) implements AsyncRequest<T> {
+import static io.github.matyrobbrt.curseforgeapi.request.AsyncRequest.LOGGER;
 
-    @Override
-    public T get() throws InterruptedException, ExecutionException {
-        return future.get();
+public class AsyncRequestValues {
+
+    @Nonnull
+    static Executor futureExecutor = Executors
+        .newSingleThreadExecutor(r -> new Thread(r, "AsyncRequestHandler"));
+
+    static Consumer<? super Throwable> defaultFailure = t -> {
+        if (t instanceof CancellationException || t instanceof TimeoutException)
+            LOGGER.debug(t.getMessage());
+        else if (t.getCause() != null)
+            LOGGER.error("AsyncRequest queue returned failure: [{}] {}", t.getClass().getSimpleName(), t.getMessage(),
+                t.getCause());
+        else
+            LOGGER.error("AsyncRequest queue returned failure: [{}] {}", t.getClass().getSimpleName(), t.getMessage());
+    };
+    
+    @Nonnull
+    public static Consumer<? super Throwable> getDefaultFailure() {
+        return defaultFailure;
     }
 
-    @Override
-    public void queue(Consumer<? super T> onSuccess, Consumer<? super Throwable> onFailure) {
-        future.whenComplete((o, t) -> {
-            if (onSuccess != null && o != null) {
-                onSuccess.accept(o);
-            }
-            if (t != null) {
-                if (onFailure != null) {
-                    onFailure.accept(t);
-                } else {
-                    AsyncRequestValues.defaultFailure.accept(t);
-                }
-            }
-        });
+    public static void setDefaultFailure(final Consumer<? super Throwable> callback) {
+        defaultFailure = callback == null ? t -> {} : callback;
     }
 
+    public static void setFutureExecutor(@Nonnull Executor executor) {
+        futureExecutor = Objects.requireNonNull(executor);
+    }
+    
 }

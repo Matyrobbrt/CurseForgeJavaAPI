@@ -31,33 +31,30 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.request.AsyncRequest;
 
-@SuppressWarnings("unchecked")
-public final class EmptyAsyncRequest<T> implements AsyncRequest<T> {
-    public static final EmptyAsyncRequest<?> INSTANCE = new EmptyAsyncRequest<>();
-    private EmptyAsyncRequest() {}
+public class MapAsyncRequest<I, O> extends AsyncRequestOperator<I, O> {
 
-    @Override
-    public <U> AsyncRequest<U> map(Function<? super T, ? extends U> mapper) {
-        return (AsyncRequest<U>) INSTANCE;
+    private final Function<? super I, ? extends O> function;
+
+    public MapAsyncRequest(AsyncRequest<I> action, Function<? super I, ? extends O> function) {
+        super(action);
+        this.function = function;
     }
 
     @Override
-    public <U> AsyncRequest<U> flatMap(Function<? super T, ? extends AsyncRequest<U>> mapper) {
-        return (AsyncRequest<U>) INSTANCE;
+    public void queue(@Nullable Consumer<? super O> success, @Nullable Consumer<? super Throwable> failure) {
+        action.queue(result -> {
+            if (success != null) {
+                success.accept(function.apply(result));
+            }
+        }, failure == null ? AsyncRequestValues.defaultFailure : failure);
     }
 
     @Override
-    public T get() throws InterruptedException, ExecutionException {
-        throw new ExecutionException(new AsyncRequest.EmptyRequestException());
-    }
-
-    @Override
-    public void queue(Consumer<? super T> onSuccess, Consumer<? super Throwable> onFailure) {
-        if (onFailure != null) {
-            onFailure.accept(new AsyncRequest.EmptyRequestException());
-        }
+    public O get() throws InterruptedException, ExecutionException {
+        return function.apply(action.get());
     }
 
 }

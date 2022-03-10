@@ -172,7 +172,7 @@ public record Pair<F, S> (F first, S second) {
      * @param  consumer the consumer
      * @return          the pair, for chaining
      */
-    public Pair<F, S> accept(BiConsumer<F, S> consumer) {
+    public Pair<F, S> accept(BiConsumer<? super F, ? super S> consumer) {
         consumer.accept(first(), second());
         return this;
     }
@@ -183,7 +183,7 @@ public record Pair<F, S> (F first, S second) {
      * @param  consumer the consumer
      * @return          the pair, for chaining
      */
-    public Pair<F, S> acceptFirst(Consumer<F> consumer) {
+    public Pair<F, S> acceptFirst(Consumer<? super F> consumer) {
         consumer.accept(first());
         return this;
     }
@@ -194,7 +194,7 @@ public record Pair<F, S> (F first, S second) {
      * @param  consumer the consumer
      * @return          the pair, for chaining
      */
-    public Pair<F, S> acceptSecond(Consumer<S> consumer) {
+    public Pair<F, S> acceptSecond(Consumer<? super S> consumer) {
         consumer.accept(second());
         return this;
     }
@@ -206,7 +206,7 @@ public record Pair<F, S> (F first, S second) {
      * @param  <T>    the return type
      * @return        the mapped value
      */
-    public <T> T map(BiFunction<F, S, T> mapper) {
+    public <T> T map(BiFunction<? super F, ? super S, ? extends T> mapper) {
         return mapper.apply(first(), second());
     }
 
@@ -219,8 +219,8 @@ public record Pair<F, S> (F first, S second) {
      * @param  <NEW_SECOND> the new first value type
      * @return              the mapped pair
      */
-    public <NEW_FIRST, NEW_SECOND> Pair<NEW_FIRST, NEW_SECOND> mapBoth(Function<F, NEW_FIRST> firstMapper,
-        Function<S, NEW_SECOND> secondMapper) {
+    public <NEW_FIRST, NEW_SECOND> Pair<NEW_FIRST, NEW_SECOND> mapBoth(
+        Function<? super F, ? extends NEW_FIRST> firstMapper, Function<? super S, NEW_SECOND> secondMapper) {
         return of(firstMapper.apply(first()), secondMapper.apply(second()));
     }
 
@@ -231,7 +231,7 @@ public record Pair<F, S> (F first, S second) {
      * @param  <NEW_FIRST> the new first value type
      * @return             the mapped pair
      */
-    public <NEW_FIRST> Pair<NEW_FIRST, S> mapFirst(Function<F, NEW_FIRST> mapper) {
+    public <NEW_FIRST> Pair<NEW_FIRST, S> mapFirst(Function<? super F, ? extends NEW_FIRST> mapper) {
         return of(mapper.apply(first()), second());
     }
 
@@ -253,7 +253,7 @@ public record Pair<F, S> (F first, S second) {
      * @param  <NEW_SECOND> the new first value type
      * @return              the mapped pair
      */
-    public <NEW_SECOND> Pair<F, NEW_SECOND> mapSecond(Function<S, NEW_SECOND> mapper) {
+    public <NEW_SECOND> Pair<F, NEW_SECOND> mapSecond(Function<? super S, ? extends NEW_SECOND> mapper) {
         return of(first(), mapper.apply(second()));
     }
 

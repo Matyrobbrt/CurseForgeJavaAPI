@@ -27,37 +27,13 @@
 
 package io.github.matyrobbrt.curseforgeapi.request.async;
 
-import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import io.github.matyrobbrt.curseforgeapi.request.AsyncRequest;
 
-@SuppressWarnings("unchecked")
-public final class EmptyAsyncRequest<T> implements AsyncRequest<T> {
-    public static final EmptyAsyncRequest<?> INSTANCE = new EmptyAsyncRequest<>();
-    private EmptyAsyncRequest() {}
+public abstract class AsyncRequestOperator<I, O> implements AsyncRequest<O> {
 
-    @Override
-    public <U> AsyncRequest<U> map(Function<? super T, ? extends U> mapper) {
-        return (AsyncRequest<U>) INSTANCE;
+    protected final AsyncRequest<I> action;
+
+    protected AsyncRequestOperator(AsyncRequest<I> action) {
+        this.action = action;
     }
-
-    @Override
-    public <U> AsyncRequest<U> flatMap(Function<? super T, ? extends AsyncRequest<U>> mapper) {
-        return (AsyncRequest<U>) INSTANCE;
-    }
-
-    @Override
-    public T get() throws InterruptedException, ExecutionException {
-        throw new ExecutionException(new AsyncRequest.EmptyRequestException());
-    }
-
-    @Override
-    public void queue(Consumer<? super T> onSuccess, Consumer<? super Throwable> onFailure) {
-        if (onFailure != null) {
-            onFailure.accept(new AsyncRequest.EmptyRequestException());
-        }
-    }
-
 }
