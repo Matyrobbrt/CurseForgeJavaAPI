@@ -115,6 +115,15 @@ allprojects {
     if (project.hasProperty("close")) {
         tasks.publish.finalizedBy closeAndReleaseRepository
     }
+    jar {
+        destinationDirectory = file("./build/libs/${version}/")
+    }
+    javadocJar {
+        destinationDirectory = file("./build/libs/${version}/")
+    }
+    sourcesJar {
+        destinationDirectory = file("./build/libs/${version}/")
+    }
 }
 
 compileJava.options.encoding = "UTF-8"
