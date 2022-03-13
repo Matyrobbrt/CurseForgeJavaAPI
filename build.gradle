@@ -98,8 +98,8 @@ allprojects {
                         "https://s01.oss.sonatype.org/content/repositories/snapshots/"
                         : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
                 credentials {
-                    username = ossrhUser
-                    password = ossrhPassword
+                    username = findProperty("ossrhUser") ? ossrhUser : ""
+                    password = findProperty("ossrhPassword") ? ossrhPassword : ""
                 }
             }
         }
@@ -109,8 +109,8 @@ allprojects {
     }
     nexusStaging {
         serverUrl = "https://s01.oss.sonatype.org/service/local/"
-        username = ossrhUser
-        password = ossrhPassword
+        username = findProperty("ossrhUser") ? ossrhUser : ""
+        password = findProperty("ossrhPassword") ? ossrhPassword : ""
     }
     if (project.hasProperty("close")) {
         tasks.publish.finalizedBy closeAndReleaseRepository
