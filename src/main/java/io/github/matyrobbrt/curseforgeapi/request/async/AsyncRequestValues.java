@@ -54,6 +54,12 @@ public class AsyncRequestValues {
             LOGGER.error("AsyncRequest queue returned failure: [{}] {}", t.getClass().getSimpleName(), t.getMessage());
     };
     
+    static boolean emptyRequestThrows = false;
+    
+    public static void setEmptyRequestThrows(final boolean emptyRequestThrows) {
+        AsyncRequestValues.emptyRequestThrows = emptyRequestThrows;
+    }
+    
     @Nonnull
     public static Consumer<? super Throwable> getDefaultFailure() {
         return defaultFailure;

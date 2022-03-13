@@ -198,12 +198,17 @@ public final class ModSearchQuery implements Query {
 
     @Override
     public Arguments toArgs() {
-        return Arguments.of("gameId", gameId).put("classId", classId).put("categoryId", categoryId)
-            .put("gameVersion", encodeURL(gameVersion)).put("searchFilter", encodeURL(searchFilter))
+        return Arguments.of("gameId", gameId)
+            .put("classId", classId)
+            .put("categoryId", categoryId)
+            .put("gameVersion", encodeURL(gameVersion))
+            .put("searchFilter", encodeURL(searchFilter))
             .put("sortField", sortField == null ? null : sortField.ordinal() + 1)
             .put("sortOrder", sortOrder == null ? null : sortOrder.toString())
             .put("modLoaderType", modLoaderType == null ? null : modLoaderType.ordinal() + 1)
-            .put("gameVersionTypeId", gameVersionTypeId).put("slug", slug).put("index", index)
+            .put("gameVersionTypeId", gameVersionTypeId)
+            .put("slug", encodeURL(slug))
+            .put("index", index)
             .put("pageSize", pageSize);
     }
 

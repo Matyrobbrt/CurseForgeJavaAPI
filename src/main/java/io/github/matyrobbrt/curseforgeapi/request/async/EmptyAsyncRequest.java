@@ -55,7 +55,7 @@ public final class EmptyAsyncRequest<T> implements AsyncRequest<T> {
 
     @Override
     public void queue(Consumer<? super T> onSuccess, Consumer<? super Throwable> onFailure) {
-        if (onFailure != null) {
+        if (onFailure != null && AsyncRequestValues.emptyRequestThrows) {
             onFailure.accept(new AsyncRequest.EmptyRequestException());
         }
     }

@@ -64,8 +64,26 @@ public interface AsyncRequest<T> {
         AsyncRequestValues.setFutureExecutor(executor);
     }
 
-    static void setDefaultFailure(final Consumer<? super Throwable> callback) {
+    /**
+     * Sets the default failure callback for async requests. <br>
+     * Setting it to {@code null} will make the callback an empty consumer.
+     * 
+     * @param callback the default failure callback
+     */
+    static void setDefaultFailure(@Nullable final Consumer<? super Throwable> callback) {
         AsyncRequestValues.setDefaultFailure(callback);
+    }
+
+    /**
+     * Sets if
+     * {@link io.github.matyrobbrt.curseforgeapi.request.async.EmptyAsyncRequest
+     * empty requests} should throw an {@link EmptyRequestException exception} when
+     * {@link #queue(Consumer, Consumer)} is called.
+     * 
+     * @param emptyRequestThrows if empty requests should throw
+     */
+    static void setEmptyRequestThrows(final boolean emptyRequestThrows) {
+        AsyncRequestValues.setEmptyRequestThrows(emptyRequestThrows);
     }
 
     /**
