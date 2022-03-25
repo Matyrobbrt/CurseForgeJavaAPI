@@ -325,6 +325,47 @@ public final class Response<T> {
     }
 
     /**
+     * If a value is present, returns the result of applying the given
+     * {@code Response}-bearing mapping function to the value, otherwise returns an
+     * empty {@code Response}.
+     *
+     * <p>
+     * This method is similar to {@link #map(Function)}, but the mapping function is
+     * one whose result is already an {@code Response}, and if invoked,
+     * {@code flatMap} does not wrap it within an additional {@code Response}.
+     * 
+     * <br>
+     * Opposite to {@link #flatMap(Function)}, this method allows the mapper to
+     * throw an exception, which will be sneakily thrown back.
+     *
+     * @param  <U>                  The type of value of the {@code Response}
+     *                              returned by the mapping function
+     * @param  mapper               the mapping function to apply to a value, if
+     *                              present
+     * @return                      the result of applying an
+     *                              {@code Response}-bearing mapping function to the
+     *                              value of this {@code Response}, if a value is
+     *                              present, otherwise an empty {@code Response}
+     * @throws NullPointerException if the mapping function is {@code null} or
+     *                              returns a {@code null} result
+     */
+    @SuppressWarnings("unchecked")
+    public <U> Response<U> flatMapWithException(ExceptionFunction<? super T, ? extends Response<? extends U>, ?> mapper) {
+        Objects.requireNonNull(mapper);
+        if (!isPresent()) {
+            return empty(statusCode);
+        } else {
+            Response<U> r = null;
+            try {
+                r = (Response<U>) mapper.apply(value);
+            } catch (Exception e) {
+                Utils.sneakyThrow(e);
+            }
+            return Objects.requireNonNull(r);
+        }
+    }
+
+    /**
      * If a response value is present, returns an {@code Response} describing the
      * value, otherwise returns an {@code Response} produced by the supplying
      * function.

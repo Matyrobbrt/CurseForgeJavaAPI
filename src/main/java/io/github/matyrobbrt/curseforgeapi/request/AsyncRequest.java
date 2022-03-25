@@ -47,6 +47,7 @@ import io.github.matyrobbrt.curseforgeapi.request.async.MapAsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.async.OfCompletableFutureAsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.async.OfValueAsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.async.PairAsyncRequest;
+import io.github.matyrobbrt.curseforgeapi.request.async.WithExceptionAsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.util.ExceptionFunction;
 
 /**
@@ -146,6 +147,20 @@ public interface AsyncRequest<T> {
     }
 
     /**
+     * Maps this request. <br>
+     * Opposite to {@link #map(Function)}, this method allows the mapper to throw an
+     * exception, which will be sneakily thrown back.
+     * 
+     * @param  <U>    the new type of the request
+     * @param  mapper the mapper to use
+     * @return        the request
+     */
+    @Nonnull
+    default <U> AsyncRequest<U> mapWithException(@Nonnull ExceptionFunction<? super T, ? extends U, ?> mapper) {
+        return map(mapper::applyNoException);
+    }
+
+    /**
      * Intermediate operator that returns a modified {@link AsyncRequest}.
      *
      * @param  flatMap The mapping function to apply to the action result, must
@@ -182,7 +197,13 @@ public interface AsyncRequest<T> {
     @Nonnull
     default <U, E extends Exception> AsyncRequest<U> flatMapWithException(
         @Nonnull ExceptionFunction<? super T, ? extends AsyncRequest<U>, E> mapper) {
-        return flatMap(mapper::applyNoException);
+        return flatMap(v -> {
+            try {
+                return mapper.apply(v);
+            } catch (Exception e) {
+                return new WithExceptionAsyncRequest<>(e);
+            }
+        });
     }
 
     /**
