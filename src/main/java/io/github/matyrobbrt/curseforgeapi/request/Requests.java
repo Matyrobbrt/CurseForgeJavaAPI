@@ -43,6 +43,8 @@ import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.Query;
 import io.github.matyrobbrt.curseforgeapi.schemas.Category;
+import io.github.matyrobbrt.curseforgeapi.schemas.PaginatedData;
+import io.github.matyrobbrt.curseforgeapi.schemas.Pagination;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
 import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintFuzzyMatch;
 import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintsMatchesResult;
@@ -196,6 +198,18 @@ public final class Requests {
     public static Request<List<Mod>> searchMods(ModSearchQuery query) {
         return new Request<>(format("/v1/mods/search", query.toArgs()), Method.GET, "data", Types.MOD_LIST);
     }
+    
+    /**
+     * Searches for mods based on the specified query. <br>
+     * This request provides the {@link Pagination} as well.
+     * 
+     * @param  query the query to search
+     * @return       the request
+     */
+    public static Request<PaginatedData<List<Mod>>> searchModsPaginated(ModSearchQuery query) {
+        return new Request<>(format("/v1/mods/search", query.toArgs()), Method.GET, (g, j) -> PaginatedData.fromJson(g, j, Types.MOD_LIST));
+    }
+
 
     /**
      * Get a list of featured, popular and recently updated mods.

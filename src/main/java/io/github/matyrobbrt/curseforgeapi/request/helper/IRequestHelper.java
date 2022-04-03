@@ -108,6 +108,11 @@ public interface IRequestHelper {
      * @see Requests#searchMods(ModSearchQuery)
      */
     Object searchMods(ModSearchQuery query) throws CurseForgeException;
+    
+    /**
+     * @see Requests#searchModsPaginated(ModSearchQuery)
+     */
+    Object searchModsPaginated(ModSearchQuery query) throws CurseForgeException;
 
     /**
      * @see Requests#getFeaturedMods(FeaturedModsQuery)

@@ -40,6 +40,7 @@ import io.github.matyrobbrt.curseforgeapi.request.query.GetFuzzyMatchesQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
 import io.github.matyrobbrt.curseforgeapi.schemas.Category;
+import io.github.matyrobbrt.curseforgeapi.schemas.PaginatedData;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
 import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintFuzzyMatch;
 import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintsMatchesResult;
@@ -119,6 +120,14 @@ public class AsyncRequestHelper implements IRequestHelper {
     @Override
     public AsyncRequest<Response<List<Mod>>> searchMods(ModSearchQuery query) throws CurseForgeException {
         return api.makeAsyncRequest(Requests.searchMods(query));
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AsyncRequest<Response<PaginatedData<List<Mod>>>> searchModsPaginated(ModSearchQuery query) throws CurseForgeException {
+        return api.makeAsyncRequest(Requests.searchModsPaginated(query));
     }
 
     /**
