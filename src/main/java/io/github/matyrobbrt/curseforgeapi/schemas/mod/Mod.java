@@ -41,7 +41,7 @@ public record Mod(int id, int gameId, String name, String slug, ModLinks links, 
     double downloadCount, boolean isFeatured, int primaryCategoryId, List<Category> categories,
     @Nullable Integer classId, List<ModAuthor> authors, ModAsset logo, List<ModAsset> screenshots, int mainFileId,
     List<File> latestFiles, List<FileIndex> latestFilesIndexes, String dateModified, String dateReleased,
-    @Nullable Boolean allowModDistribution, int gamePopularityRank) {
+    @Nullable Boolean allowModDistribution, int gamePopularityRank, boolean isAvailable, @Nullable Integer thumbsUpCount) {
 
     public Instant getDateModifiedAsInstant() {
         return Instant.parse(dateModified);
