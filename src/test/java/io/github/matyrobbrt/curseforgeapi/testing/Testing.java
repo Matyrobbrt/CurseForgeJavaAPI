@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import org.assertj.core.api.Condition;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -48,7 +49,6 @@ import io.github.matyrobbrt.curseforgeapi.schemas.file.FileRelationType;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.FileReleaseType;
 import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintsMatchesResult;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
-import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
 import io.github.matyrobbrt.curseforgeapi.util.Constants;
 import io.github.matyrobbrt.curseforgeapi.util.Constants.GameIDs;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
@@ -81,6 +81,7 @@ final class Testing {
     private static final int MOD_ID = 570544;
 
     @Test
+    @DisplayName("Category exists")
     void categoryShouldExist() throws CurseForgeException {
         final var helper = CF_API.getHelper();
 
@@ -96,6 +97,7 @@ final class Testing {
     }
 
     @Test
+    @DisplayName("File can be downloaded")
     void tryDownloadFile() throws CurseForgeException, IOException {
         final var helper = CF_API.getHelper();
 
@@ -111,6 +113,7 @@ final class Testing {
     }
 
     @Test
+    @DisplayName("Game version is valid")
     void gameVersionIsValid() throws CurseForgeException {
         final var optionalTypes = CF_API.makeRequest(getGameVersionTypes(GameIDs.MINECRAFT));
         assertThat(optionalTypes).isPresent();
@@ -122,12 +125,14 @@ final class Testing {
     }
     
     @Test
+    @DisplayName("Changelog exists")
     void changelogExists() throws CurseForgeException {
         final var changelogOptional = CF_API.makeRequest(getModFileChangelog(570544, 3657902));
         assertThat(changelogOptional).isPresent();
     }
     
     @Test
+    @DisplayName("Featured mods exist")
     void featuredModsExist() throws CurseForgeException {
         final var optionalFeaturedMods = CF_API.makeRequest(Requests.getFeaturedMods(
             FeaturedModsQuery.of(GameIDs.MINECRAFT)
@@ -142,6 +147,7 @@ final class Testing {
     }
     
     @Test
+    @DisplayName("Search Results are valid")
     void searchResultsShouldBeValid() throws CurseForgeException {
         final var helper = CF_API.getHelper();
         
@@ -177,11 +183,13 @@ final class Testing {
     }
     
     @Test
+    @DisplayName("File is invalid")
     void fileShouldBeInvalid() throws CurseForgeException {
         assertThat(CF_API.getHelper().getModFile(Integer.MIN_VALUE, Integer.MAX_VALUE)).isEmpty();
     }
     
     @Test
+    @DisplayName("Minecraft exists")
     void minecraftShouldExist() throws CurseForgeException {
         final Response<List<Game>> gamesResponse = CF_API.makeRequest(getGames());
         assertThat(gamesResponse).isPresent();
@@ -191,6 +199,7 @@ final class Testing {
     }
     
     @Test
+    @DisplayName("Games have categories")
     void gamesHaveCategories() throws CurseForgeException {
         final Response<List<Game>> gamesResponse = CF_API.makeRequest(getGames());
         assertThat(gamesResponse).isPresent();
@@ -205,9 +214,10 @@ final class Testing {
     }
     
     @Test
+    @DisplayName("Projects can be found")
     void projectsCanBeFound() throws CurseForgeException {
         final var responses = IntStream.range(Constants.MIN_PROJECT_ID, Constants.MIN_PROJECT_ID + 4)
-            .<Response<Mod>>mapToObj(i -> {
+            .mapToObj(i -> {
                 try {
                     return CF_API.makeRequest(Requests.getMod(i));
                 } catch (CurseForgeException e) {
@@ -223,6 +233,7 @@ final class Testing {
     }
     
     @Test
+    @DisplayName("Async and")
     void testAsyncAnd() throws Exception {
         final var asyncHelper = CF_API.getAsyncHelper();
         final var responseOptional = asyncHelper.getMod(MOD_ID)
@@ -238,7 +249,8 @@ final class Testing {
     }
     
     @Test
-    void testAsyncAdd2() throws Exception {
+    @DisplayName("Async add 2")
+    void testAsyncAnd2() throws Exception {
         final var asyncHelper = CF_API.getAsyncHelper();
         final var r = asyncHelper.getMod(MOD_ID)
             .and(CF_API.makeAsyncRequest(getModDescription(MOD_ID)))
@@ -250,6 +262,7 @@ final class Testing {
     }
     
     @Test
+    @DisplayName("Files with fingerprints exist")
     void filesWithFingerprintExist() throws Exception {
         final var helper = CF_API.getHelper();
         
@@ -277,6 +290,7 @@ final class Testing {
     }
     
     @Test
+    @DisplayName("Slug search")
     void slugSearchWorks() throws CurseForgeException {
         final var helper = CF_API.getHelper();
         
@@ -290,7 +304,8 @@ final class Testing {
         assertThat(queryResponse).isNotEmpty();
     }
     
-    @Test
+    // Test shouldn't be executed every time.
+    // @Test
     void tryUpload() throws CurseForgeException, IOException {
         final var response = CF_API.makeUploadApiRequest("minecraft", 
             UploadApiRequests.uploadFile(551821, UploadQuery
