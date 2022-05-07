@@ -321,6 +321,9 @@ public class CurseForgeAPI {
             }).build();
             final var response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             statusCode = response.statusCode();
+            if (statusCode == Constants.StatusCodes.API_UNAVAILABLE) {
+                return Response.empty(statusCode);
+            }
             return Response.ofNullableAndStatusCode(gson.fromJson(response.body(), JsonObject.class), statusCode);
         } catch (InterruptedException ine) {
             logger.error(
@@ -378,8 +381,14 @@ public class CurseForgeAPI {
                 return r;
             }).build();
             return new OfHttpResponseAsyncRequest<>(httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
-                .thenApply(response -> Response
-                    .ofNullableAndStatusCode(gson.fromJson(response.body(), JsonObject.class), response.statusCode())));
+                .thenApply(response -> {
+                    if (response.statusCode() == Constants.StatusCodes.API_UNAVAILABLE) {
+                        return Response.empty(response.statusCode());
+                    } else {
+                        return Response
+                         .ofNullableAndStatusCode(gson.fromJson(response.body(), JsonObject.class), response.statusCode());
+                    }
+                }));
         } catch (Exception e) {
             throw new CurseForgeException(e);
         }
@@ -422,9 +431,9 @@ public class CurseForgeAPI {
             }).build();
             final var response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             statusCode = response.statusCode();
-            if (statusCode == StatusCodes.NOT_FOUND) {
+            if (statusCode == StatusCodes.NOT_FOUND || statusCode == StatusCodes.API_UNAVAILABLE) {
              // A 404 returns the request apparently?
-                return Response.empty(statusCode);
+             return Response.empty(statusCode);
             }
             return Response.ofNullableAndStatusCode(gson.fromJson(response.body(), JsonElement.class), statusCode)
                 .map(j -> request.responseDecoder().apply(gson, j));
@@ -474,7 +483,7 @@ public class CurseForgeAPI {
             return new OfHttpResponseAsyncRequest<>(httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> Response
                     // A 404 returns the request apparently?
-                    .ofNullableAndStatusCode(response.statusCode() == StatusCodes.NOT_FOUND ? null : gson.fromJson(response.body(), JsonElement.class), response.statusCode())
+                    .ofNullableAndStatusCode((response.statusCode() == StatusCodes.NOT_FOUND || response.statusCode() == StatusCodes.API_UNAVAILABLE) ? null : gson.fromJson(response.body(), JsonElement.class), response.statusCode())
                     .map(j -> request.responseDecoder().apply(gson, j))));
         } catch (Exception e) {
             throw new CurseForgeException(e);

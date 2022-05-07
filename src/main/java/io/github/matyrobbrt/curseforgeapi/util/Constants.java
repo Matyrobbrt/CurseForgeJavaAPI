@@ -125,6 +125,8 @@ public final class Constants {
          *      "https://tools.ietf.org/html/rfc7231#section-6.6.1">https://tools.ietf.org/html/rfc7231#section-6.6.1</a>
          */
         public static final int INTERNAL_SERVER_ERROR = 500;
+        
+        public static final int API_UNAVAILABLE = 503;
 
     }
 
