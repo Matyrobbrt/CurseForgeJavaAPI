@@ -36,11 +36,17 @@ import io.github.matyrobbrt.curseforgeapi.schemas.Category;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.FileIndex;
 
+/**
+ * @param dateCreated  the creation date of the mod
+ * @param dateReleased the release date of the mod. Note: this seems to be the date when the latest file was released
+ * @param dateModified the last time the mod was modified
+ */
 @CurseForgeSchema("https://docs.curseforge.com/#schemamod")
 public record Mod(int id, int gameId, String name, String slug, ModLinks links, String summary, ModStatus status,
     double downloadCount, boolean isFeatured, int primaryCategoryId, List<Category> categories,
     @Nullable Integer classId, List<ModAuthor> authors, ModAsset logo, List<ModAsset> screenshots, int mainFileId,
-    List<File> latestFiles, List<FileIndex> latestFilesIndexes, String dateModified, String dateReleased,
+    List<File> latestFiles, List<FileIndex> latestFilesIndexes,
+    String dateCreated, String dateModified, String dateReleased,
     @Nullable Boolean allowModDistribution, int gamePopularityRank, boolean isAvailable, @Nullable Integer thumbsUpCount) {
 
     public Instant getDateModifiedAsInstant() {
@@ -49,6 +55,10 @@ public record Mod(int id, int gameId, String name, String slug, ModLinks links, 
 
     public Instant getDateReleasedAsInstant() {
         return Instant.parse(dateReleased);
+    }
+
+    public Instant getDateCreatedAsInstant() {
+        return Instant.parse(dateCreated);
     }
 
 }

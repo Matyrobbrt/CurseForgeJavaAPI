@@ -6,3 +6,4 @@ bin/
 .env
 build/
 test/
+.idea

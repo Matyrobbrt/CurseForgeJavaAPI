@@ -34,6 +34,7 @@ import java.nio.channels.Channels;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
@@ -68,4 +69,7 @@ public record File(int id, int gameId, int modId, boolean isAvailable, String di
         }
     }
 
+    public Instant getFileDateAsInstant() {
+        return Instant.parse(fileDate);
+    }
 }

@@ -47,10 +47,13 @@ license {
     include '**/*.java'
 }
 
-
 java {
     withJavadocJar()
     withSourcesJar()
+}
+
+test {
+    useJUnitPlatform()
 }
 
 allprojects {
@@ -73,7 +76,7 @@ allprojects {
                     licenses {
                         license {
                             name = 'MIT License'
-                            url = 'http://www.opensource.org/licenses/mit-license.php'
+                            url = 'https://www.opensource.org/licenses/mit-license.php'
                         }
                     }
                     developers {

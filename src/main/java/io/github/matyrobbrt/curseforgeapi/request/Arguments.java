@@ -61,7 +61,7 @@ public class Arguments {
     }
     
     public Arguments copy() {
-        return new Arguments(args);
+        return new Arguments(new HashMap<>(args));
     }
     
     public Arguments putAll(@Nullable Arguments other) {

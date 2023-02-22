@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -275,17 +276,15 @@ final class Testing {
         final var files = filesResponse.get();
         assertThat(
             CF_API.makeRequest(getFingerprintMatches(
-                IntStream
-                    .range(0, files.size())
-                    .map(i -> files.get(i).fileFingerprint()).toArray()
-            ))    
+                    files.stream().mapToInt(File::fileFingerprint).toArray()
+            ))
         ).isNotEmpty()
         .get()
-        .satisfies(new Condition<FingerprintsMatchesResult>() {
+        .satisfies(new Condition<>() {
             @Override
             public boolean matches(FingerprintsMatchesResult value) {
                 return value.exactMatches().size() == files.size();
-            };
+            }
         });
     }
     
@@ -302,6 +301,24 @@ final class Testing {
             .classId(mod.classId())
             .slug(mod.slug()));
         assertThat(queryResponse).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("DateReleased is same as release date of latest file")
+    void dateReleasedSameAsLatestFile() throws CurseForgeException {
+        final var helper = CF_API.getHelper();
+
+        final var modResponse = helper.getMod(MOD_ID);
+        assertThat(modResponse).isNotEmpty();
+
+        final var latestFile = helper.getModFile(MOD_ID, modResponse.get().latestFilesIndexes().get(0).fileId());
+        assertThat(latestFile).isNotEmpty()
+                .hasValueSatisfying(new Condition<>() {
+                    @Override
+                    public boolean matches(File value) {
+                        return value.getFileDateAsInstant().equals(modResponse.get().getDateReleasedAsInstant());
+                    }
+                });
     }
     
     // Test shouldn't be executed every time.
