@@ -205,7 +205,7 @@ public final class ModSearchQuery implements Query {
             .put("searchFilter", encodeURL(searchFilter))
             .put("sortField", sortField == null ? null : sortField.ordinal() + 1)
             .put("sortOrder", sortOrder == null ? null : sortOrder.toString())
-            .put("modLoaderType", modLoaderType == null ? null : modLoaderType.ordinal() + 1)
+            .put("modLoaderType", modLoaderType == null ? null : modLoaderType.ordinal())
             .put("gameVersionTypeId", gameVersionTypeId)
             .put("slug", encodeURL(slug))
             .put("index", index)

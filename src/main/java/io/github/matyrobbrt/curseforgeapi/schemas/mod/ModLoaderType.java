@@ -32,7 +32,8 @@ import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 @CurseForgeSchema("https://docs.curseforge.com/#schemamodloadertype")
 public enum ModLoaderType {
 
-    ANY("Any"), FORGE("Forge"), CAULDRON("Cauldron"), LITE_LOADER("LiteLoader"), FABRIC("Fabric");
+    ANY("Any"), FORGE("Forge"), CAULDRON("Cauldron"),
+    LITE_LOADER("LiteLoader"), FABRIC("Fabric"), QUILT("Quilt");
 
     private final String name;
 
@@ -46,6 +47,6 @@ public enum ModLoaderType {
     }
 
     public static ModLoaderType byId(int id) {
-        return values()[id - 1];
+        return values()[id];
     }
 }

@@ -109,7 +109,7 @@ public class CurseForgeAPI {
             .registerTypeAdapterFactory(new RecordTypeAdapterFactory());
 
         final List<Class<? extends Enum<?>>> cfSchemaEnums = List.of(ApiStatus.class, FileRelationType.class,
-            FileReleaseType.class, FileStatus.class, ModLoaderType.class, HashAlgo.class, Status.class,
+            FileReleaseType.class, FileStatus.class, HashAlgo.class, Status.class,
             ModStatus.class);
         cfSchemaEnums.forEach(e -> gsonBuilder.registerTypeAdapter(e, CFSchemaEnumTypeAdapter.constructUnsafe(e)));
         return gsonBuilder.create();
