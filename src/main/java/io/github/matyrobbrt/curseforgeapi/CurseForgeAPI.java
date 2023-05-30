@@ -321,7 +321,7 @@ public class CurseForgeAPI {
             }).build();
             final var response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             statusCode = response.statusCode();
-            if (statusCode == Constants.StatusCodes.API_UNAVAILABLE) {
+            if (statusCode == StatusCodes.NOT_FOUND || statusCode == StatusCodes.API_UNAVAILABLE || statusCode == StatusCodes.GATEWAY_TIMEOUT) {
                 return Response.empty(statusCode);
             }
             return Response.ofNullableAndStatusCode(gson.fromJson(response.body(), JsonObject.class), statusCode);
@@ -382,7 +382,7 @@ public class CurseForgeAPI {
             }).build();
             return new OfHttpResponseAsyncRequest<>(httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
-                    if (response.statusCode() == Constants.StatusCodes.API_UNAVAILABLE) {
+                    if (response.statusCode() == StatusCodes.NOT_FOUND || response.statusCode() == StatusCodes.API_UNAVAILABLE || response.statusCode() == StatusCodes.GATEWAY_TIMEOUT) {
                         return Response.empty(response.statusCode());
                     } else {
                         return Response
