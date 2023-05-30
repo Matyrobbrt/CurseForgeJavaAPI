@@ -128,6 +128,15 @@ public final class Constants {
         
         public static final int API_UNAVAILABLE = 503;
 
+        /**
+         * The 504 (Gateway Timeout) status code indicates that the server,
+         * while acting as a gateway or proxy, did not receive a timely response
+         * from an upstream server it needed to access in order to complete the
+         * request.
+         * @see <a href="https://tools.ietf.org/html/rfc7231#section-6.6.5">https://tools.ietf.org/html/rfc7231#section-6.6.5</a>
+         */
+        public static final int GATEWAY_TIMEOUT = 504;
+
     }
 
     public static final class GameIDs {
