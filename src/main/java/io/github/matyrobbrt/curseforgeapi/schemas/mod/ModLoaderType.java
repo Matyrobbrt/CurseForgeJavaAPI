@@ -33,7 +33,8 @@ import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 public enum ModLoaderType {
 
     ANY("Any"), FORGE("Forge"), CAULDRON("Cauldron"),
-    LITE_LOADER("LiteLoader"), FABRIC("Fabric"), QUILT("Quilt");
+    LITE_LOADER("LiteLoader"), FABRIC("Fabric"), QUILT("Quilt"),
+    NEOFORGE("NeoForge");
 
     private final String name;
 
