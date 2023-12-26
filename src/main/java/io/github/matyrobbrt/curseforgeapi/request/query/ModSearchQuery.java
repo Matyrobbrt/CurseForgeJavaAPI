@@ -33,6 +33,10 @@ import io.github.matyrobbrt.curseforgeapi.schemas.Category;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static io.github.matyrobbrt.curseforgeapi.util.Utils.encodeURL;
 
 /**
@@ -60,6 +64,7 @@ public final class ModSearchQuery implements Query {
     private SortField sortField;
     private SortOrder sortOrder;
     private ModLoaderType modLoaderType;
+    private final List<ModLoaderType> modLoaderTypes = new ArrayList<>();
     private Integer gameVersionTypeId;
     private String slug;
     private Integer index;
@@ -151,6 +156,19 @@ public final class ModSearchQuery implements Query {
     }
 
     /**
+     * Filter only mods associated to given modloaders (Forge, Fabric ...). Must be
+     * coupled with {@link #gameVersion(String)}.
+     * <p>If both this and {@link #modLoaderType} are used, this takes priority.</p>
+     *
+     * @param modLoaderTypes
+     * @return
+     */
+    public ModSearchQuery modLoaderTypes(final List<ModLoaderType> modLoaderTypes) {
+        this.modLoaderTypes.addAll(modLoaderTypes);
+        return this;
+    }
+
+    /**
      * Filter only mods that contain files tagged with versions of the given
      * {@code gameVersionTypeId}.
      * 
@@ -206,6 +224,9 @@ public final class ModSearchQuery implements Query {
             .put("sortField", sortField == null ? null : sortField.ordinal() + 1)
             .put("sortOrder", sortOrder == null ? null : sortOrder.toString())
             .put("modLoaderType", modLoaderType == null ? null : modLoaderType.ordinal())
+            .put("modLoaderTypes", modLoaderTypes.isEmpty() ? null : '[' + modLoaderTypes.stream()
+                    .map(ModLoaderType::toString)
+                    .collect(Collectors.joining(",")) + ']')
             .put("gameVersionTypeId", gameVersionTypeId)
             .put("slug", encodeURL(slug))
             .put("index", index)
