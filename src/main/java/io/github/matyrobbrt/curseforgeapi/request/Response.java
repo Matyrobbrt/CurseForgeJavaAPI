@@ -54,7 +54,7 @@ import io.github.matyrobbrt.curseforgeapi.util.Utils;
  * @see        Optional
  */
 @ParametersAreNonnullByDefault
-public final class Response<T> {
+public record Response<T>(@Nullable T value, @Nullable Integer statusCode) {
 
     /**
      * Returns an empty {@code Response} instance. No value is present for this
@@ -101,14 +101,6 @@ public final class Response<T> {
     public static <T> Response<T> ofNullableAndStatusCode(@Nullable T value, @Nullable Integer statusCode) {
         if (statusCode == Constants.StatusCodes.NOT_FOUND) { return empty(statusCode); }
         return value == null ? empty(statusCode) : of(value, statusCode);
-    }
-
-    private final T value;
-    private final Integer statusCode;
-
-    private Response(@Nullable T value, @Nullable Integer statusCode) {
-        this.value = value;
-        this.statusCode = statusCode;
     }
 
     /**
@@ -483,18 +475,6 @@ public final class Response<T> {
      */
     public Optional<T> toOptional() {
         return isPresent() ? Optional.of(value) : Optional.empty();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) { return true; }
-
-        return obj instanceof Response<?> other && Objects.equals(value, other.value) && statusCode == other.statusCode;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(value) + 31 * Objects.hashCode(statusCode);
     }
 
 }
