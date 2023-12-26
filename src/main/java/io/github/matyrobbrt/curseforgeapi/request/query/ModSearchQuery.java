@@ -64,7 +64,7 @@ public final class ModSearchQuery implements Query {
     private SortField sortField;
     private SortOrder sortOrder;
     private ModLoaderType modLoaderType;
-    private final List<ModLoaderType> modLoaderTypes = new ArrayList<>();
+    private List<ModLoaderType> modLoaderTypes;
     private Integer gameVersionTypeId;
     private String slug;
     private Integer index;
@@ -164,7 +164,7 @@ public final class ModSearchQuery implements Query {
      * @return
      */
     public ModSearchQuery modLoaderTypes(final List<ModLoaderType> modLoaderTypes) {
-        this.modLoaderTypes.addAll(modLoaderTypes);
+        this.modLoaderTypes = modLoaderTypes;
         return this;
     }
 
@@ -224,9 +224,8 @@ public final class ModSearchQuery implements Query {
             .put("sortField", sortField == null ? null : sortField.ordinal() + 1)
             .put("sortOrder", sortOrder == null ? null : sortOrder.toString())
             .put("modLoaderType", modLoaderType == null ? null : modLoaderType.ordinal())
-            .put("modLoaderTypes", modLoaderTypes.isEmpty() ? null : '[' + modLoaderTypes.stream()
-                    .map(ModLoaderType::toString)
-                    .collect(Collectors.joining(",")) + ']')
+            .put("modLoaderTypes", modLoaderTypes == null || modLoaderTypes.isEmpty() ? null : '[' + modLoaderTypes
+                    .stream().map(ModLoaderType::toString).collect(Collectors.joining(",")) + ']')
             .put("gameVersionTypeId", gameVersionTypeId)
             .put("slug", encodeURL(slug))
             .put("index", index)
