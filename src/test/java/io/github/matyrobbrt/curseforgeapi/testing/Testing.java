@@ -28,11 +28,13 @@
 package io.github.matyrobbrt.curseforgeapi.testing;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -109,6 +111,7 @@ final class Testing {
         assertThat(files).isNotEmpty();
 
         final var dowPath = Path.of("test", "test.jar");
+        Files.deleteIfExists(dowPath);
         files.get(0).download(dowPath);
         assertThat(dowPath).exists();
     }
@@ -181,6 +184,33 @@ final class Testing {
             .get()
             .asList()
             .hasSizeGreaterThan(15);
+
+        final var cosmeticCategory = categoriesResponse.get()
+            .stream()
+            .filter(c -> c.name().equals("Cosmetic"))
+            .findFirst()
+            .get();
+
+        final var multipleLoadersQuery = ModSearchQuery.of(game)
+            .category(cosmeticCategory)
+            .gameVersion("1.20.1")
+            .index(1)
+            .pageSize(20)
+            .searchFilter("Presence Footsteps")
+            .modLoaderTypes(List.of(ModLoaderType.FORGE, ModLoaderType.FABRIC))
+            .sortField(SortField.TOTAL_DOWNLOADS);
+        assertThat(multipleLoadersQuery.toString()).isNotEmpty();
+
+        final var multipleLoadersResults = helper.searchMods(multipleLoadersQuery);
+        assertThat(multipleLoadersResults)
+            .isPresent()
+            .get()
+            .asList()
+            .hasSizeGreaterThan(1);
+
+        final var hasFabric = multipleLoadersResults.get().stream().anyMatch(mod -> mod.id() == 334259);
+        final var hasForge = multipleLoadersResults.get().stream().anyMatch(mod -> mod.id() == 433068);
+        assertThat(hasFabric && hasForge).isTrue();
     }
     
     @Test
