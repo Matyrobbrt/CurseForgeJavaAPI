@@ -28,6 +28,7 @@
 package io.github.matyrobbrt.curseforgeapi.testing;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -110,6 +111,7 @@ final class Testing {
         assertThat(files).isNotEmpty();
 
         final var dowPath = Path.of("test", "test.jar");
+        Files.deleteIfExists(dowPath);
         files.get(0).download(dowPath);
         assertThat(dowPath).exists();
     }

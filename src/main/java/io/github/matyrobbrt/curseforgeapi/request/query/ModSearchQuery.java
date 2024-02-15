@@ -146,22 +146,17 @@ public final class ModSearchQuery implements Query {
     /**
      * Filter only mods associated to a given modloader (Forge, Fabric ...). Must be
      * coupled with {@link #gameVersion(String)}.
-     * 
-     * @param  modLoaderType
-     * @return
      */
     public ModSearchQuery modLoaderType(final ModLoaderType modLoaderType) {
-        this.modLoaderType = modLoaderType;
-        return this;
+        return modLoaderTypes(List.of(modLoaderType));
     }
 
     /**
      * Filter only mods associated to given modloaders (Forge, Fabric ...). Must be
      * coupled with {@link #gameVersion(String)}.
-     * <p>If both this and {@link #modLoaderType} are used, this takes priority.</p>
      *
-     * @param modLoaderTypes
-     * @return
+     * <p>
+     * If both this and {@link #modLoaderType(ModLoaderType)} are used, this takes priority.
      */
     public ModSearchQuery modLoaderTypes(final List<ModLoaderType> modLoaderTypes) {
         this.modLoaderTypes = modLoaderTypes;
@@ -223,7 +218,6 @@ public final class ModSearchQuery implements Query {
             .put("searchFilter", encodeURL(searchFilter))
             .put("sortField", sortField == null ? null : sortField.ordinal() + 1)
             .put("sortOrder", sortOrder == null ? null : sortOrder.toString())
-            .put("modLoaderType", modLoaderType == null ? null : modLoaderType.ordinal())
             .put("modLoaderTypes", modLoaderTypes == null || modLoaderTypes.isEmpty() ? null : '[' + modLoaderTypes
                     .stream().map(ModLoaderType::toString).collect(Collectors.joining(",")) + ']')
             .put("gameVersionTypeId", gameVersionTypeId)
