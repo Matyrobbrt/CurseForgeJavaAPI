@@ -276,6 +276,23 @@ public final class Requests {
     }
 
     /**
+     * Get all files of the specified mod.
+     *
+     * @param  modId             the mod id the files belong to (project id)
+     * @param  gameVersionTypeId the game version to search for
+     * @param  paginationQuery   the pagination query used for the request
+     * @return                   the request
+     */
+    public static Request<PaginatedData<List<File>>> getPaginatedModFiles(int modId, @Nullable Integer gameVersionTypeId,
+        @Nullable PaginationQuery paginationQuery) {
+        return new Request<>(
+            format("/v1/mods/%s/files".formatted(modId),
+                Arguments.EMPTY.put("gameVersionTypeId", gameVersionTypeId)
+                    .putAll(paginationQuery == null ? null : paginationQuery.toArgs())),
+            Method.GET, (g, j) -> PaginatedData.fromJson(g, j, Types.FILE_LIST));
+    }
+
+    /**
      * Get a list of files.
      * 
      * @param  fileIds a list of file ids to fetch

@@ -30,13 +30,18 @@ package io.github.matyrobbrt.curseforgeapi.request.helper;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nonnull;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
+import io.github.matyrobbrt.curseforgeapi.request.Request;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.GetFuzzyMatchesQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
+import io.github.matyrobbrt.curseforgeapi.schemas.PaginatedData;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.Mod;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
+
+import java.util.List;
+import java.util.function.Function;
 
 @ParametersAreNonnullByDefault
 public interface IRequestHelper {
@@ -136,15 +141,30 @@ public interface IRequestHelper {
     Object getModFiles(int modId) throws CurseForgeException;
 
     /**
+     * @see Requests#getPaginatedModFiles(int, Integer, PaginationQuery)
+     */
+    Object listModFiles(int modId) throws CurseForgeException;
+
+    /**
      * @see Requests#getModFiles(int, Integer, PaginationQuery)
      */
     Object getModFiles(int modId, @Nullable Integer gameVersionTypeId, @Nullable PaginationQuery paginationQuery)
         throws CurseForgeException;
 
     /**
+     * @see Requests#getPaginatedModFiles(int, Integer, PaginationQuery)
+     */
+    Object listModFiles(int modId, @Nullable Integer gameVersionTypeId) throws CurseForgeException;
+
+    /**
      * @see Requests#getModFiles(Mod)
      */
     Object getModFiles(Mod mod) throws CurseForgeException;
+
+    /**
+     * @see Requests#getPaginatedModFiles(int, Integer, PaginationQuery)
+     */
+    Object listModFiles(Mod mod) throws CurseForgeException;
 
     /**
      * @see Requests#getFiles(int...)
@@ -176,4 +196,6 @@ public interface IRequestHelper {
      * @see Requests#getFingerprintsFuzzyMatches(GetFuzzyMatchesQuery)
      */
     Object getFingerprintsFuzzyMatches(@Nonnull GetFuzzyMatchesQuery query) throws CurseForgeException;
+
+    <T, R> Object paginated(Function<PaginationQuery, Request<PaginatedData<T>>> requester, Function<T, List<R>> collector) throws CurseForgeException;
 }

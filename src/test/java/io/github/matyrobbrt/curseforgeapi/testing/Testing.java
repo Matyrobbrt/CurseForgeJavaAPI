@@ -30,6 +30,7 @@ package io.github.matyrobbrt.curseforgeapi.testing;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -82,6 +83,7 @@ final class Testing {
         .get();
     
     private static final int MOD_ID = 570544;
+    private static final int JEI_MOD_ID = 238222;
 
     @Test
     @DisplayName("Category exists")
@@ -114,6 +116,34 @@ final class Testing {
         Files.deleteIfExists(dowPath);
         files.get(0).download(dowPath);
         assertThat(dowPath).exists();
+    }
+
+    @Test
+    @DisplayName("Pagination helpers work")
+    void testPaginationHelpers() throws Exception {
+        final var helper = CF_API.getHelper();
+
+        final var res = helper.listModFiles(JEI_MOD_ID);
+        assertThat(res).isPresent();
+
+        final var expected = CF_API.makeRequest(Requests.getPaginatedModFiles(JEI_MOD_ID, null, null));
+        assertThat(expected).isPresent();
+
+        List<File> files = new ArrayList<>();
+        res.get().forEachRemaining(files::add);
+        assertThat(files).hasSize(expected.orElseThrow().pagination().totalCount());
+
+        files = new ArrayList<>();
+
+        final var asyncRes = CF_API.getAsyncHelper().listModFiles(JEI_MOD_ID);
+        final var asyncItr = asyncRes.get().orElseThrow();
+        int am = 0;
+        while (asyncItr.hasNext()) {
+            System.out.println("Async at: " + (am++));
+            files.add(asyncItr.next().get());
+        }
+
+        assertThat(files).hasSize(expected.orElseThrow().pagination().totalCount());
     }
 
     @Test

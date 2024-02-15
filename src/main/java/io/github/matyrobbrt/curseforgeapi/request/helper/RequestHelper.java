@@ -27,7 +27,11 @@
 
 package io.github.matyrobbrt.curseforgeapi.request.helper;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
@@ -87,6 +91,16 @@ public class RequestHelper implements IRequestHelper {
     public Response<List<File>> getModFiles(int modId, @Nullable Integer gameVersionTypeId, @Nullable PaginationQuery paginationQuery)
         throws CurseForgeException {
         return api.makeRequest(Requests.getModFiles(modId, gameVersionTypeId, paginationQuery));
+    }
+
+    @Override
+    public Response<Iterator<File>> listModFiles(int modId) throws CurseForgeException {
+        return listModFiles(modId, null);
+    }
+
+    @Override
+    public Response<Iterator<File>> listModFiles(int modId, @Nullable Integer gameVersionTypeId) throws CurseForgeException {
+        return paginated(query -> Requests.getPaginatedModFiles(modId, gameVersionTypeId, query), Function.identity());
     }
 
     /**
@@ -193,6 +207,11 @@ public class RequestHelper implements IRequestHelper {
         return mr(Requests.getModFiles(mod));
     }
 
+    @Override
+    public Response<Iterator<File>> listModFiles(Mod mod) throws CurseForgeException {
+        return paginated(query -> Requests.getPaginatedModFiles(mod.id(), null, query), Function.identity());
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -232,7 +251,57 @@ public class RequestHelper implements IRequestHelper {
     public Response<List<FingerprintFuzzyMatch>> getFingerprintsFuzzyMatches(GetFuzzyMatchesQuery query) throws CurseForgeException {
         return mr(Requests.getFingerprintsFuzzyMatches(query));
     }
-    
+
+    @Override
+    public <T, R> Response<Iterator<R>> paginated(Function<PaginationQuery, Request<PaginatedData<T>>> requester, Function<T, List<R>> collector) throws CurseForgeException {
+        final var baseResponse = mr(requester.apply(PaginationQuery.of(0, 50)));
+        if (baseResponse.isEmpty()) {
+            return Response.empty(baseResponse.getStatusCode());
+        }
+        final var paginationData = baseResponse.get().pagination();
+
+        return Response.of(new Iterator<>() {
+            private final AtomicInteger currentIndex = new AtomicInteger(-1);
+            private final AtomicInteger size = new AtomicInteger();
+            private volatile List<R> currentResponse;
+            private final AtomicInteger currentListIndex = new AtomicInteger(-1);
+
+            {
+                currentResponse = collector.apply(baseResponse.get().data());
+                size.set(paginationData.totalCount());
+            }
+
+            @Override
+            public boolean hasNext() {
+                return currentIndex.get() + 1 < size.get();
+            }
+
+            @Override
+            public R next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException("No more elements left");
+                }
+                if (currentListIndex.get() + 1 >= currentResponse.size()) {
+                    requery();
+                }
+
+                currentIndex.getAndIncrement();
+                return currentResponse.get(currentListIndex.incrementAndGet());
+            }
+
+            private synchronized void requery() {
+                try {
+                    final var res = mr(requester.apply(PaginationQuery.of(currentIndex.get() + 1, 50))).orElseThrow();
+                    size.set(res.pagination().totalCount());
+                    currentResponse = collector.apply(res.data());
+                    currentListIndex.set(-1);
+                } catch (CurseForgeException exception) {
+                    throw new RuntimeException(exception);
+                }
+            }
+        }, baseResponse.getStatusCode());
+    }
+
     private <T> Response<T> mr(Request<T> req) throws CurseForgeException {
         return api.makeRequest(req);
     }

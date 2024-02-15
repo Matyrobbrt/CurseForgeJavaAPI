@@ -27,7 +27,15 @@
 
 package io.github.matyrobbrt.curseforgeapi.request.helper;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
@@ -35,6 +43,7 @@ import io.github.matyrobbrt.curseforgeapi.request.AsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.Request;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.request.Response;
+import io.github.matyrobbrt.curseforgeapi.request.async.OfCompletableFutureAsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.GetFuzzyMatchesQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
@@ -81,6 +90,11 @@ public class AsyncRequestHelper implements IRequestHelper {
         return api.makeAsyncRequest(Requests.getModFiles(modId));
     }
 
+    @Override
+    public AsyncRequest<Response<Iterator<AsyncRequest<File>>>> listModFiles(int modId) throws CurseForgeException {
+        return paginated(query -> Requests.getPaginatedModFiles(modId, null, query), Function.identity());
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -88,6 +102,11 @@ public class AsyncRequestHelper implements IRequestHelper {
     public AsyncRequest<Response<List<File>>> getModFiles(int modId, @Nullable Integer gameVersionTypeId,
         @Nullable PaginationQuery paginationQuery) throws CurseForgeException {
         return api.makeAsyncRequest(Requests.getModFiles(modId, gameVersionTypeId, paginationQuery));
+    }
+
+    @Override
+    public AsyncRequest<Response<Iterator<AsyncRequest<File>>>> listModFiles(int modId, @Nullable Integer gameVersionTypeId) throws CurseForgeException {
+        return paginated(query -> Requests.getPaginatedModFiles(modId, gameVersionTypeId, query), Function.identity());
     }
 
     /**
@@ -194,6 +213,11 @@ public class AsyncRequestHelper implements IRequestHelper {
         return mr(Requests.getModFiles(mod));
     }
 
+    @Override
+    public AsyncRequest<Response<Iterator<AsyncRequest<File>>>> listModFiles(Mod mod) throws CurseForgeException {
+        return paginated(query -> Requests.getPaginatedModFiles(mod.id(), null, query), Function.identity());
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -232,6 +256,75 @@ public class AsyncRequestHelper implements IRequestHelper {
     @Override
     public AsyncRequest<Response<List<FingerprintFuzzyMatch>>> getFingerprintsFuzzyMatches(GetFuzzyMatchesQuery query) throws CurseForgeException {
         return mr(Requests.getFingerprintsFuzzyMatches(query));
+    }
+
+    @Override
+    public <T, R> AsyncRequest<Response<Iterator<AsyncRequest<R>>>> paginated(Function<PaginationQuery, Request<PaginatedData<T>>> requester, Function<T, List<R>> collector) throws CurseForgeException {
+        return mr(requester.apply(PaginationQuery.of(0, 50))).map(baseResponse -> {
+            if (baseResponse.isEmpty()) {
+                return Response.empty(baseResponse.getStatusCode());
+            }
+            final var paginationData = baseResponse.get().pagination();
+
+            return Response.of(new Iterator<>() {
+                private final AtomicInteger currentIndex = new AtomicInteger(-1);
+                private final AtomicInteger size = new AtomicInteger();
+                private final List<OfCompletableFutureAsyncRequest<R>> requests = Collections.synchronizedList(new ArrayList<>());
+                private final AtomicReference<List<R>> currentResponse = new AtomicReference<>();
+                private final AtomicInteger currentListIndex = new AtomicInteger(-1);
+
+                {
+                    size.set(paginationData.totalCount());
+                    currentResponse.set(collector.apply(baseResponse.get().data()));
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return currentIndex.get() + 1 < size.get();
+                }
+
+                @Override
+                public AsyncRequest<R> next() {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException("No more elements left");
+                    }
+
+                    if (currentListIndex.get() + 1 >= 50) {
+                        requery();
+                    } else if (currentResponse.get() != null) {
+                        currentIndex.getAndIncrement();
+                        final var req = new OfCompletableFutureAsyncRequest<R>(CompletableFuture.completedFuture(currentResponse.get().get(currentListIndex.incrementAndGet())));
+                        requests.add(req);
+                        return req;
+                    }
+
+                    currentIndex.getAndIncrement();
+                    currentListIndex.incrementAndGet();
+                    final var req = new OfCompletableFutureAsyncRequest<R>(new CompletableFuture<>());
+                    requests.add(req);
+                    return req;
+                }
+
+                private synchronized void requery() {
+                    try {
+                        final var res = mr(requester.apply(PaginationQuery.of(currentIndex.get() + 1, 50)));
+                        res.map(Response::orElseThrow).queue(data -> {
+                            final var values = collector.apply(data.data());
+                            for (int i = data.pagination().index(); i < data.pagination().index() + data.pagination().resultCount(); i++) {
+                                if (i < requests.size()) {
+                                    requests.get(i).future().complete(values.get(i - data.pagination().index()));
+                                }
+                            }
+                            currentResponse.set(values);
+                        });
+                        currentResponse.set(null);
+                        currentListIndex.set(-1);
+                    } catch (CurseForgeException exception) {
+                        throw new RuntimeException(exception);
+                    }
+                }
+            }, baseResponse.getStatusCode());
+        });
     }
 
     private <T> AsyncRequest<Response<T>> mr(Request<T> req) throws CurseForgeException {
