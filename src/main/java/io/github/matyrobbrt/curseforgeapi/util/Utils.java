@@ -132,14 +132,10 @@ public final class Utils {
      * @return       the encoded string. If {@code value} is null, this will be null
      *               as well.
      */
-    public static String encodeURL(@Nullable String value) {
+   public static String encodeURL(@Nullable String value) {
         if (value == null) {
             return null;
         }
-        try {
-            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            throw new RuntimeException(ex.getCause());
-        }
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }
