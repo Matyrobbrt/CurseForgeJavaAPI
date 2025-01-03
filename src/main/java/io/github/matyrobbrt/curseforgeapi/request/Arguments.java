@@ -27,12 +27,8 @@
 
 package io.github.matyrobbrt.curseforgeapi.request;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
+import io.github.matyrobbrt.curseforgeapi.util.MultiMap;
 
 /**
  * A list of keys and values for specifying arguments when send a request to
@@ -43,15 +39,15 @@ import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
  */
 public class Arguments {
 
-    public static final Arguments EMPTY = new Arguments(ArrayListMultimap.create()).immutable();
+    public static final Arguments EMPTY = new Arguments(new MultiMap<>()).immutable();
 
     public static Arguments of(String key, Object value) {
-        return new Arguments(ArrayListMultimap.create()).put(key, value);
+        return new Arguments(new MultiMap<>()).put(key, value);
     }
 
-    final Multimap<String, String> args;
+    final MultiMap<String, String> args;
 
-    Arguments(Multimap<String, String> args) {
+    Arguments(MultiMap<String, String> args) {
         this.args = args;
     }
 
@@ -63,7 +59,7 @@ public class Arguments {
     }
     
     public Arguments copy() {
-        return new Arguments(ArrayListMultimap.create(args));
+        return new Arguments(new MultiMap<>(args));
     }
     
     public Arguments putAll(@Nullable Arguments other) {
@@ -75,7 +71,7 @@ public class Arguments {
     }
 
     public String build() {
-        return String.join("&", args.entries().stream().map(e -> "%s=%s".formatted(e.getKey(), e.getValue())).toArray(String[]::new));
+        return String.join("&", args.entrySet().stream().map(e -> "%s=%s".formatted(e.getKey(), e.getValue())).toArray(String[]::new));
     }
 
     @Override
@@ -89,13 +85,13 @@ public class Arguments {
     
     private static final class Immutable extends Arguments {
 
-        Immutable(Multimap<String, String> args) {
-            super(ArrayListMultimap.create(args));
+        Immutable(MultiMap<String, String> args) {
+            super(new MultiMap<>(args));
         }
         
         @Override
         public Arguments put(String key, Object value) {
-            final var newArgs = ArrayListMultimap.create(args);
+            final var newArgs = new MultiMap<>(args);
             if (value == null) {
                 return new Arguments(newArgs);
             }
@@ -105,7 +101,7 @@ public class Arguments {
         
         @Override
         public Arguments putAll(@Nullable Arguments other) {
-            final var newArgs = ArrayListMultimap.create(args);
+            final var newArgs = new MultiMap<>(args);
             if (other == null) {
                 return new Arguments(newArgs);
             }
