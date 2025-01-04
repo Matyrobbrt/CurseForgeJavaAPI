@@ -209,7 +209,6 @@ public final class ModSearchQuery implements Query {
 
     @Override
     public Arguments toArgs() {
-        // https://www.curseforge.com/api/v1/mods/search?gameId=432&index=0&classId=6&filterText=SimpleOres&pageSize=20&sortField=1&gameFlavors%5B0%5D=4
         Arguments arguments = Arguments.of("gameId", gameId)
                 .put("classId", classId)
                 .put("categoryId", categoryId)
