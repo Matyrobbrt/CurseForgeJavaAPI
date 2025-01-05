@@ -71,7 +71,7 @@ public class Arguments {
     }
 
     public String build() {
-        return String.join("&", args.entrySet().stream().map(e -> "%s=%s".formatted(e.getKey(), e.getValue())).toArray(String[]::new));
+        return String.join("&", args.entrySet().stream().map(e -> "%s=%s".formatted(e.getKey(), String.join(",", e.getValue()))).toArray(String[]::new));
     }
 
     @Override
