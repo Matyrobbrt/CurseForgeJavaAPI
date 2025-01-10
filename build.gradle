@@ -107,9 +107,6 @@ allprojects {
             }
         }
     }
-    signing {
-        sign publishing.publications.mavenJava
-    }
     nexusStaging {
         serverUrl = "https://s01.oss.sonatype.org/service/local/"
         username = findProperty("ossrhUser") ? ossrhUser : ""

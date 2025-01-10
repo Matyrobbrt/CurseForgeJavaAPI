@@ -213,7 +213,7 @@ public final class ModSearchQuery implements Query {
                 .put("classId", classId)
                 .put("categoryId", categoryId)
                 .put("gameVersion", encodeURL(gameVersion))
-                .put("filterText", encodeURL(searchFilter))
+                .put("searchFilter", encodeURL(searchFilter))
                 .put("sortField", sortField == null ? null : sortField.ordinal() + 1)
                 .put("sortOrder", sortOrder == null ? null : sortOrder.toString())
                 .put("gameVersionTypeId", gameVersionTypeId)
@@ -221,14 +221,20 @@ public final class ModSearchQuery implements Query {
                 .put("index", index)
                 .put("pageSize", pageSize);
 
+        StringBuilder modLoadersTypesArg = new StringBuilder("[");
         if(modLoaderTypes != null) {
-            int gameFlavorsIndex = 0;
-            for (ModLoaderType gameFlavorsId : modLoaderTypes) {
-                arguments.put(encodeURL("gameFlavors[" + gameFlavorsIndex + "]"), Arrays.asList(ModLoaderType.values())
-                        .indexOf(gameFlavorsId));
-                gameFlavorsIndex++;
+            List<ModLoaderType> loaders = Arrays.asList(ModLoaderType.values());
+            for (ModLoaderType modLoadersId : modLoaderTypes) {
+                modLoadersTypesArg.append(loaders.indexOf(modLoadersId));
+
+                if(modLoaderTypes.indexOf(modLoadersId) != modLoaderTypes.size() - 1) {
+                    modLoadersTypesArg.append(",");
+                }
             }
         }
+
+        arguments.put("modLoaderTypes", modLoadersTypesArg.append("]").toString());
+
         return arguments;
     }
 

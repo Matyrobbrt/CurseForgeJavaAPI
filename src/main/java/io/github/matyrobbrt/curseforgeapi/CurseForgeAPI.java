@@ -93,8 +93,6 @@ public class CurseForgeAPI {
      * The base URL for requests to the CurseForge API.
      */
     public static final String REQUEST_TARGET = "https://api.curseforge.com";
-
-    public static final String REQUEST_SEARCH_TARGET = "https://www.curseforge.com/api";
     /**
      * The base URL for requests to the CurseForge Upload API.
      */
@@ -308,7 +306,7 @@ public class CurseForgeAPI {
             throw new CurseForgeException("Cannot make requests with a null API key!");
         int statusCode = 0;
         try {
-            final URL target = new URL((genericRequest instanceof Request<?> request && request.getType() == Requests.Types.MOD_LIST ? REQUEST_SEARCH_TARGET : REQUEST_TARGET) + genericRequest.endpoint());
+            final URL target = new URL((REQUEST_TARGET) + genericRequest.endpoint());
             final var httpRequest = Utils.makeWithSupplier(() -> {
                 var r = HttpRequest.newBuilder(URI.create(target.toString())).header("Accept", "application/json")
                     .header("x-api-key", apiKey);
@@ -369,7 +367,7 @@ public class CurseForgeAPI {
         if (apiKey == null)
             throw new CurseForgeException("Cannot make requests with a null API key!");
         try {
-            final URL target = new URL((genericRequest instanceof Request<?> request && request.getType() == Requests.Types.MOD_LIST ? REQUEST_SEARCH_TARGET : REQUEST_TARGET) + genericRequest.endpoint());
+            final URL target = new URL((REQUEST_TARGET) + genericRequest.endpoint());
             final var httpRequest = Utils.makeWithSupplier(() -> {
                 var r = HttpRequest.newBuilder(URI.create(target.toString())).header("Accept", "application/json")
                     .header("x-api-key", apiKey);
