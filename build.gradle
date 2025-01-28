@@ -26,7 +26,7 @@ repositories {
 dependencies {
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.11.0'
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.16'
-    implementation group: 'com.github.mizosoft.methanol', name: 'methanol', version: '1.6.0'
+    implementation group: 'com.github.mizosoft.methanol', name: 'methanol', version: '1.8.0'
 
     testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.16'
     testImplementation group: 'io.github.cdimascio', name: 'dotenv-java', version: '2.2.3'
