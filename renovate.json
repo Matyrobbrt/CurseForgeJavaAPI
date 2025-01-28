@@ -1,7 +1,9 @@
 {
   "extends": [
-    "config:base", 
-    ":dependencyDashboardApproval" 
-  ], 
-  "labels": ["dependencies"] 
+    "config:recommended",
+    ":dependencyDashboardApproval"
+  ],
+  "labels": [
+    "dependencies"
+  ]
 }
