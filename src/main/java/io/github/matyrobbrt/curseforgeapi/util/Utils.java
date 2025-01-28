@@ -132,7 +132,7 @@ public final class Utils {
      * @return       the encoded string. If {@code value} is null, this will be null
      *               as well.
      */
-   public static String encodeURL(@Nullable String value) {
+    public static String encodeURL(@Nullable String value) {
         if (value == null) {
             return null;
         }
