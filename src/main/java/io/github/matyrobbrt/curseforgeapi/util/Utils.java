@@ -136,10 +136,6 @@ public final class Utils {
         if (value == null) {
             return null;
         }
-        try {
-            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            throw new RuntimeException(ex.getCause());
-        }
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 }
