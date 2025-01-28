@@ -1,4 +1,4 @@
-module curseforgeapi {
+open module curseforgeapi {
     requires com.google.gson;
     requires methanol;
     requires org.slf4j;
