@@ -56,8 +56,8 @@ public class PaginationQuery implements Query {
     private PaginationQuery() {
     }
 
-    private Integer index;
-    private Integer pageSize;
+    Integer index;
+    Integer pageSize;
 
     /**
      * @param  index a zero based index of the first item to include in the response

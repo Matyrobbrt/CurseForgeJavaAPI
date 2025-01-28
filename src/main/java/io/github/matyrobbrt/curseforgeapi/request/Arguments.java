@@ -27,10 +27,9 @@
 
 package io.github.matyrobbrt.curseforgeapi.request;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
+
+import java.util.HashMap;
 
 /**
  * A list of keys and values for specifying arguments when send a request to
@@ -47,9 +46,9 @@ public class Arguments {
         return new Arguments(new HashMap<>()).put(key, value);
     }
 
-    final Map<String, String> args;
+    final HashMap<String, String> args;
 
-    Arguments(Map<String, String> args) {
+    Arguments(HashMap<String, String> args) {
         this.args = args;
     }
 
@@ -73,7 +72,7 @@ public class Arguments {
     }
 
     public String build() {
-        return String.join("&", args.entrySet().stream().map(e -> "%s=%s".formatted(e.getKey(), e.getValue())).toArray(String[]::new));
+        return String.join("&", args.entrySet().stream().map(e -> "%s=%s".formatted(e.getKey(), String.join(",", e.getValue()))).toArray(String[]::new));
     }
 
     @Override
@@ -87,8 +86,8 @@ public class Arguments {
     
     private static final class Immutable extends Arguments {
 
-        Immutable(Map<String, String> args) {
-            super(Map.copyOf(args));
+        Immutable(HashMap<String, String> args) {
+            super(new HashMap<>(args));
         }
         
         @Override

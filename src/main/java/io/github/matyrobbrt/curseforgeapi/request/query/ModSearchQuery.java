@@ -33,7 +33,6 @@ import io.github.matyrobbrt.curseforgeapi.schemas.Category;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,7 +62,6 @@ public final class ModSearchQuery implements Query {
     private String searchFilter;
     private SortField sortField;
     private SortOrder sortOrder;
-    private ModLoaderType modLoaderType;
     private List<ModLoaderType> modLoaderTypes;
     private Integer gameVersionTypeId;
     private String slug;
@@ -209,21 +207,30 @@ public final class ModSearchQuery implements Query {
         return this;
     }
 
+    /**
+     * Paginate this query with the given {@code pagination}.
+     */
+    public ModSearchQuery paginated(PaginationQuery pagination) {
+        this.index = pagination.index;
+        this.pageSize = pagination.pageSize;
+        return this;
+    }
+
     @Override
     public Arguments toArgs() {
         return Arguments.of("gameId", gameId)
-            .put("classId", classId)
-            .put("categoryId", categoryId)
-            .put("gameVersion", encodeURL(gameVersion))
-            .put("searchFilter", encodeURL(searchFilter))
-            .put("sortField", sortField == null ? null : sortField.ordinal() + 1)
-            .put("sortOrder", sortOrder == null ? null : sortOrder.toString())
-            .put("modLoaderTypes", modLoaderTypes == null || modLoaderTypes.isEmpty() ? null : '[' + modLoaderTypes
-                    .stream().map(ModLoaderType::toString).collect(Collectors.joining(",")) + ']')
-            .put("gameVersionTypeId", gameVersionTypeId)
-            .put("slug", encodeURL(slug))
-            .put("index", index)
-            .put("pageSize", pageSize);
+                .put("classId", classId)
+                .put("categoryId", categoryId)
+                .put("gameVersion", encodeURL(gameVersion))
+                .put("searchFilter", encodeURL(searchFilter))
+                .put("sortField", sortField == null ? null : sortField.ordinal() + 1)
+                .put("sortOrder", sortOrder == null ? null : sortOrder.toString())
+                .put("modLoaderTypes", (modLoaderTypes == null || modLoaderTypes.isEmpty()) ? null : "[" + modLoaderTypes.stream()
+                        .map(type -> String.valueOf(type.ordinal())).collect(Collectors.joining(",")) + "]")
+                .put("gameVersionTypeId", gameVersionTypeId)
+                .put("slug", encodeURL(slug))
+                .put("index", index)
+                .put("pageSize", pageSize);
     }
 
     @Override

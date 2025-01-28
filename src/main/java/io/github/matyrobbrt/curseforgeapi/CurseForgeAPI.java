@@ -69,7 +69,6 @@ import io.github.matyrobbrt.curseforgeapi.schemas.Status;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.FileRelationType;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.FileReleaseType;
 import io.github.matyrobbrt.curseforgeapi.schemas.file.FileStatus;
-import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModStatus;
 import io.github.matyrobbrt.curseforgeapi.util.Constants;
 import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
@@ -286,7 +285,7 @@ public class CurseForgeAPI {
      * @param  request             the request to send
      * @return                     the response of the request, deserialized from a
      *                             {@link JsonObject} using
-     *                             {@link Request#decodeResponse(WrappedJson)}, if
+     *                             {@link Request#decodeResponse(Gson, JsonObject)}}, if
      *                             present
      * @throws CurseForgeException
      */
@@ -346,7 +345,7 @@ public class CurseForgeAPI {
      * @return                     the async request, which will be sent when
      *                             {@link AsyncRequest#queue} is called. The result
      *                             is deserialized from a {@link JsonObject} using
-     *                             {@link Request#decodeResponse(WrappedJson)}, if
+     *                             {@link Request#decodeResponse(Gson, JsonObject)}}, if
      *                             present
      * @throws CurseForgeException
      */

@@ -380,6 +380,16 @@ final class Testing {
                     }
                 });
     }
+
+    @Test
+    @DisplayName("Can search by loader type")
+    void searchByLoaderType() throws CurseForgeException {
+        final var helper = CF_API.getHelper();
+        final var response = helper.searchMods(ModSearchQuery.of(GameIDs.MINECRAFT).classId(6).modLoaderType(ModLoaderType.NEOFORGE));
+        assertThat(response).isNotEmpty();
+
+        assertThat(response.get()).allMatch(m -> m.latestFiles().stream().anyMatch(f -> f.gameVersions().contains("NeoForge")));
+    }
     
     // Test shouldn't be executed every time.
     // @Test

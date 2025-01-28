@@ -34,10 +34,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
 public class Request<R> extends GenericRequest {
+    private Type type = null;
 
     private final BiFunction<Gson, JsonObject, R> responseDecoder;
 
@@ -52,6 +54,7 @@ public class Request<R> extends GenericRequest {
     
     public Request(String endpoint, Method method, JsonElement body, String responseObjectName, Type type) {
         super(endpoint, method, body);
+        this.type = type;
         this.responseDecoder = (g, j) -> {
             final var dataElement = j.get(responseObjectName);
             if (dataElement.isJsonPrimitive()) {
@@ -69,4 +72,8 @@ public class Request<R> extends GenericRequest {
         return responseDecoder.apply(gson, response);
     }
 
+    @Nullable
+    public Type getType() {
+        return type;
+    }
 }
