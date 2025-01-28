@@ -28,7 +28,8 @@
 package io.github.matyrobbrt.curseforgeapi.request;
 
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
-import io.github.matyrobbrt.curseforgeapi.util.MultiMap;
+
+import java.util.HashMap;
 
 /**
  * A list of keys and values for specifying arguments when send a request to
@@ -39,15 +40,15 @@ import io.github.matyrobbrt.curseforgeapi.util.MultiMap;
  */
 public class Arguments {
 
-    public static final Arguments EMPTY = new Arguments(new MultiMap<>()).immutable();
+    public static final Arguments EMPTY = new Arguments(new HashMap<>()).immutable();
 
     public static Arguments of(String key, Object value) {
-        return new Arguments(new MultiMap<>()).put(key, value);
+        return new Arguments(new HashMap<>()).put(key, value);
     }
 
-    final MultiMap<String, String> args;
+    final HashMap<String, String> args;
 
-    Arguments(MultiMap<String, String> args) {
+    Arguments(HashMap<String, String> args) {
         this.args = args;
     }
 
@@ -59,7 +60,7 @@ public class Arguments {
     }
     
     public Arguments copy() {
-        return new Arguments(new MultiMap<>(args));
+        return new Arguments(new HashMap<>(args));
     }
     
     public Arguments putAll(@Nullable Arguments other) {
@@ -85,13 +86,13 @@ public class Arguments {
     
     private static final class Immutable extends Arguments {
 
-        Immutable(MultiMap<String, String> args) {
-            super(new MultiMap<>(args));
+        Immutable(HashMap<String, String> args) {
+            super(new HashMap<>(args));
         }
         
         @Override
         public Arguments put(String key, Object value) {
-            final var newArgs = new MultiMap<>(args);
+            final var newArgs = new HashMap<>(args);
             if (value == null) {
                 return new Arguments(newArgs);
             }
@@ -101,7 +102,7 @@ public class Arguments {
         
         @Override
         public Arguments putAll(@Nullable Arguments other) {
-            final var newArgs = new MultiMap<>(args);
+            final var newArgs = new HashMap<>(args);
             if (other == null) {
                 return new Arguments(newArgs);
             }

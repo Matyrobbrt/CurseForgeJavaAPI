@@ -72,6 +72,7 @@ public class Request<R> extends GenericRequest {
         return responseDecoder.apply(gson, response);
     }
 
+    @Nullable
     public Type getType() {
         return type;
     }

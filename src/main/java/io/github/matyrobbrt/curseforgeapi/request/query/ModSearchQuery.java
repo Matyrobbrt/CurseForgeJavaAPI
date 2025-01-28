@@ -33,8 +33,8 @@ import io.github.matyrobbrt.curseforgeapi.schemas.Category;
 import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
 import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.matyrobbrt.curseforgeapi.util.Utils.encodeURL;
 
@@ -207,35 +207,30 @@ public final class ModSearchQuery implements Query {
         return this;
     }
 
+    /**
+     * Paginate this query with the given {@code pagination}.
+     */
+    public ModSearchQuery paginated(PaginationQuery pagination) {
+        this.index = pagination.index;
+        this.pageSize = pagination.pageSize;
+        return this;
+    }
+
     @Override
     public Arguments toArgs() {
-        Arguments arguments = Arguments.of("gameId", gameId)
+        return Arguments.of("gameId", gameId)
                 .put("classId", classId)
                 .put("categoryId", categoryId)
                 .put("gameVersion", encodeURL(gameVersion))
                 .put("searchFilter", encodeURL(searchFilter))
                 .put("sortField", sortField == null ? null : sortField.ordinal() + 1)
                 .put("sortOrder", sortOrder == null ? null : sortOrder.toString())
+                .put("modLoaderTypes", (modLoaderTypes == null || modLoaderTypes.isEmpty()) ? null : "[" + modLoaderTypes.stream()
+                        .map(type -> String.valueOf(type.ordinal())).collect(Collectors.joining(",")) + "]")
                 .put("gameVersionTypeId", gameVersionTypeId)
                 .put("slug", encodeURL(slug))
                 .put("index", index)
                 .put("pageSize", pageSize);
-
-        StringBuilder modLoadersTypesArg = new StringBuilder("[");
-        if(modLoaderTypes != null) {
-            List<ModLoaderType> loaders = Arrays.asList(ModLoaderType.values());
-            for (ModLoaderType modLoadersId : modLoaderTypes) {
-                modLoadersTypesArg.append(loaders.indexOf(modLoadersId));
-
-                if(modLoaderTypes.indexOf(modLoadersId) != modLoaderTypes.size() - 1) {
-                    modLoadersTypesArg.append(",");
-                }
-            }
-        }
-
-        arguments.put("modLoaderTypes", modLoadersTypesArg.append("]").toString());
-
-        return arguments;
     }
 
     @Override

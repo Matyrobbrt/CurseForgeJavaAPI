@@ -306,7 +306,7 @@ public class CurseForgeAPI {
             throw new CurseForgeException("Cannot make requests with a null API key!");
         int statusCode = 0;
         try {
-            final URL target = new URL((REQUEST_TARGET) + genericRequest.endpoint());
+            final URL target = new URL(REQUEST_TARGET + genericRequest.endpoint());
             final var httpRequest = Utils.makeWithSupplier(() -> {
                 var r = HttpRequest.newBuilder(URI.create(target.toString())).header("Accept", "application/json")
                     .header("x-api-key", apiKey);
@@ -367,7 +367,7 @@ public class CurseForgeAPI {
         if (apiKey == null)
             throw new CurseForgeException("Cannot make requests with a null API key!");
         try {
-            final URL target = new URL((REQUEST_TARGET) + genericRequest.endpoint());
+            final URL target = new URL(REQUEST_TARGET + genericRequest.endpoint());
             final var httpRequest = Utils.makeWithSupplier(() -> {
                 var r = HttpRequest.newBuilder(URI.create(target.toString())).header("Accept", "application/json")
                     .header("x-api-key", apiKey);
