@@ -30,4 +30,4 @@ package io.github.matyrobbrt.curseforgeapi.schemas.file;
 import io.github.matyrobbrt.curseforgeapi.annotation.CurseForgeSchema;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_FileModule")
-public record FileModule(String name, int fingerprint) {}
+public record FileModule(String name, long fingerprint) {}

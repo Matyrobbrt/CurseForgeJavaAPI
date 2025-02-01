@@ -43,7 +43,7 @@ import io.github.matyrobbrt.curseforgeapi.schemas.file.FileIndex;
  */
 @CurseForgeSchema("https://docs.curseforge.com/#schemamod")
 public record Mod(int id, int gameId, String name, String slug, ModLinks links, String summary, ModStatus status,
-    double downloadCount, boolean isFeatured, int primaryCategoryId, List<Category> categories,
+    long downloadCount, boolean isFeatured, int primaryCategoryId, List<Category> categories,
     @Nullable Integer classId, List<ModAuthor> authors, ModAsset logo, List<ModAsset> screenshots, int mainFileId,
     List<File> latestFiles, List<FileIndex> latestFilesIndexes,
     String dateCreated, String dateModified, String dateReleased,

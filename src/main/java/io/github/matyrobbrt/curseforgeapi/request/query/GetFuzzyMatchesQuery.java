@@ -51,13 +51,13 @@ public class GetFuzzyMatchesQuery {
     }
 
     private final int gameId;
-    private final List<Pair<String, int[]>> fingerprints = new ArrayList<>();
+    private final List<Pair<String, long[]>> fingerprints = new ArrayList<>();
     
     private GetFuzzyMatchesQuery(int gameId) {
         this.gameId = gameId;
     }
     
-    public GetFuzzyMatchesQuery addFingerprint(String foldername, int... fingerprints) {
+    public GetFuzzyMatchesQuery addFingerprint(String foldername, long... fingerprints) {
         this.fingerprints.add(Pair.of(foldername, fingerprints));
         return this;
     }

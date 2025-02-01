@@ -344,7 +344,7 @@ public final class Requests {
      * @param  fingerprints the fingerprints to search for
      * @return              the request
      */
-    public static Request<FingerprintsMatchesResult> getFingerprintMatches(int... fingerprints) {
+    public static Request<FingerprintsMatchesResult> getFingerprintMatches(long... fingerprints) {
         final var jObj = new JsonObject();
         final var array = new JsonArray();
         for (var f : fingerprints) {

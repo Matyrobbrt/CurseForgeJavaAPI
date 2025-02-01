@@ -246,7 +246,7 @@ public class AsyncRequestHelper implements IRequestHelper {
      * {@inheritDoc}
      */
     @Override
-    public AsyncRequest<Response<FingerprintsMatchesResult>> getFingerprintMatches(int... fingerprints) throws CurseForgeException {
+    public AsyncRequest<Response<FingerprintsMatchesResult>> getFingerprintMatches(long... fingerprints) throws CurseForgeException {
         return mr(Requests.getFingerprintMatches(fingerprints));
     }
 

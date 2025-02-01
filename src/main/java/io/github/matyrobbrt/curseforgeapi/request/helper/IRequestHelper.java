@@ -190,7 +190,7 @@ public interface IRequestHelper {
     /**
      * @see Requests#getFingerprintMatches(int...)
      */
-    Object getFingerprintMatches(int... fingerprints) throws CurseForgeException;
+    Object getFingerprintMatches(long... fingerprints) throws CurseForgeException;
 
     /**
      * @see Requests#getFingerprintsFuzzyMatches(GetFuzzyMatchesQuery)

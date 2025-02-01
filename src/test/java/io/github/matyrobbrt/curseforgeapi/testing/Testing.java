@@ -336,7 +336,7 @@ final class Testing {
         final var files = filesResponse.get();
         assertThat(
             CF_API.makeRequest(getFingerprintMatches(
-                    files.stream().mapToInt(File::fileFingerprint).toArray()
+                    files.stream().mapToLong(File::fileFingerprint).toArray()
             ))
         ).isNotEmpty()
         .get()

@@ -240,7 +240,7 @@ public class RequestHelper implements IRequestHelper {
      * {@inheritDoc}
      */
     @Override
-    public Response<FingerprintsMatchesResult> getFingerprintMatches(int... fingerprints) throws CurseForgeException {
+    public Response<FingerprintsMatchesResult> getFingerprintMatches(long... fingerprints) throws CurseForgeException {
         return mr(Requests.getFingerprintMatches(fingerprints));
     }
 

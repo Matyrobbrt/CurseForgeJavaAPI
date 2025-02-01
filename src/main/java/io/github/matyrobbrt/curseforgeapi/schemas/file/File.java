@@ -43,11 +43,11 @@ import io.github.matyrobbrt.curseforgeapi.schemas.SortableGameVersion;
 
 @CurseForgeSchema("https://docs.curseforge.com/#tocS_File")
 public record File(int id, int gameId, int modId, boolean isAvailable, String displayName, String fileName,
-    FileReleaseType releaseType, FileStatus fileStatus, List<FileHash> hashes, String fileDate, int fileLength,
-    int downloadCount, String downloadUrl, List<String> gameVersions, List<SortableGameVersion> sortableGameVersions,
+    FileReleaseType releaseType, FileStatus fileStatus, List<FileHash> hashes, String fileDate, long fileLength,
+    long downloadCount, String downloadUrl, List<String> gameVersions, List<SortableGameVersion> sortableGameVersions,
     List<FileDependency> dependencies, @Nullable Boolean exposeAsAlternative, @Nullable Integer parentProjectFileId,
     @Nullable Integer alternateFileId, @Nullable Boolean isServerPack, @Nullable Integer serverPackFileId,
-    int fileFingerprint, List<FileModule> modules) {
+    long fileFingerprint, List<FileModule> modules) {
 
     /**
      * Attempts to download the file to the specified {@code path}, creating any
