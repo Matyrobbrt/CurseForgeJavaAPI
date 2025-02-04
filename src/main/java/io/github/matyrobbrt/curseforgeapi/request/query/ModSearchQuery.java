@@ -239,7 +239,8 @@ public final class ModSearchQuery implements Query {
     }
 
     public enum SortField {
-        FEATURED, POPULARITY, LAST_UPDATED, NAME, AUTHOR, TOTAL_DOWNLOADS, CATEGORY, GAME_VERSION
+        FEATURED, POPULARITY, LAST_UPDATED, NAME, AUTHOR, TOTAL_DOWNLOADS, CATEGORY, GAME_VERSION,
+        EARLY_ACCESS, FEATURED_RELEASED, RELEASED_DATE, RATING
     }
 
     public enum SortOrder {
