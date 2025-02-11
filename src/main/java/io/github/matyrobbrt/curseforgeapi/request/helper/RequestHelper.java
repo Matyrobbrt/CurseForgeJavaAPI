@@ -39,6 +39,7 @@ import io.github.matyrobbrt.curseforgeapi.request.Request;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.request.Response;
 import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.FileListQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.GetFuzzyMatchesQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
@@ -88,9 +89,9 @@ public class RequestHelper implements IRequestHelper {
      * {@inheritDoc}
      */
     @Override
-    public Response<List<File>> getModFiles(int modId, @Nullable Integer gameVersionTypeId, @Nullable PaginationQuery paginationQuery)
+    public Response<List<File>> getModFiles(int modId, @Nullable FileListQuery query)
         throws CurseForgeException {
-        return api.makeRequest(Requests.getModFiles(modId, gameVersionTypeId, paginationQuery));
+        return api.makeRequest(Requests.getModFiles(modId, query));
     }
 
     @Override
@@ -99,8 +100,8 @@ public class RequestHelper implements IRequestHelper {
     }
 
     @Override
-    public Response<Iterator<File>> listModFiles(int modId, @Nullable Integer gameVersionTypeId) throws CurseForgeException {
-        return paginated(query -> Requests.getPaginatedModFiles(modId, gameVersionTypeId, query), Function.identity());
+    public Response<Iterator<File>> listModFiles(int modId, @Nullable FileListQuery query) throws CurseForgeException {
+        return paginated(q -> Requests.getPaginatedModFiles(modId, (query == null ? FileListQuery.of() : query).paginated(q)), Function.identity());
     }
 
     /**
@@ -209,7 +210,7 @@ public class RequestHelper implements IRequestHelper {
 
     @Override
     public Response<Iterator<File>> listModFiles(Mod mod) throws CurseForgeException {
-        return paginated(query -> Requests.getPaginatedModFiles(mod.id(), null, query), Function.identity());
+        return paginated(query -> Requests.getPaginatedModFiles(mod.id(), FileListQuery.of().paginated(query)), Function.identity());
     }
 
     /**

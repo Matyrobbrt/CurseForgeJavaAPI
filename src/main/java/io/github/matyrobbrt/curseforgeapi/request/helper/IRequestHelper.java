@@ -33,6 +33,7 @@ import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefau
 import io.github.matyrobbrt.curseforgeapi.request.Request;
 import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.FileListQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.GetFuzzyMatchesQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
@@ -141,20 +142,19 @@ public interface IRequestHelper {
     Object getModFiles(int modId) throws CurseForgeException;
 
     /**
-     * @see Requests#getPaginatedModFiles(int, Integer, PaginationQuery)
+     * @see Requests#getModFiles(int, FileListQuery)
+     */
+    Object getModFiles(int modId, @Nullable FileListQuery query) throws CurseForgeException;
+
+    /**
+     * @see Requests#getModFiles(int, FileListQuery)
+     */
+    Object listModFiles(int modId, @Nullable FileListQuery query) throws CurseForgeException;
+
+    /**
+     * @see Requests#getModFiles(int)
      */
     Object listModFiles(int modId) throws CurseForgeException;
-
-    /**
-     * @see Requests#getModFiles(int, Integer, PaginationQuery)
-     */
-    Object getModFiles(int modId, @Nullable Integer gameVersionTypeId, @Nullable PaginationQuery paginationQuery)
-        throws CurseForgeException;
-
-    /**
-     * @see Requests#getPaginatedModFiles(int, Integer, PaginationQuery)
-     */
-    Object listModFiles(int modId, @Nullable Integer gameVersionTypeId) throws CurseForgeException;
 
     /**
      * @see Requests#getModFiles(Mod)
@@ -162,7 +162,7 @@ public interface IRequestHelper {
     Object getModFiles(Mod mod) throws CurseForgeException;
 
     /**
-     * @see Requests#getPaginatedModFiles(int, Integer, PaginationQuery)
+     * @see Requests#getModFiles(int, FileListQuery)
      */
     Object listModFiles(Mod mod) throws CurseForgeException;
 

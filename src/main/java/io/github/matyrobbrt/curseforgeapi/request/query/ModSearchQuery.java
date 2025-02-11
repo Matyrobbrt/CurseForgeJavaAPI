@@ -45,7 +45,7 @@ import static io.github.matyrobbrt.curseforgeapi.util.Utils.encodeURL;
  *
  */
 @CurseForgeSchema("https://docs.curseforge.com/#search-mods")
-public final class ModSearchQuery implements Query {
+public final class ModSearchQuery extends PaginatedImpl<ModSearchQuery> {
 
     public static ModSearchQuery of(Game game) {
         return of(game.id());
@@ -65,8 +65,6 @@ public final class ModSearchQuery implements Query {
     private List<ModLoaderType> modLoaderTypes;
     private Integer gameVersionTypeId;
     private String slug;
-    private Integer index;
-    private Integer pageSize;
 
     private ModSearchQuery(final int gameId) {
         this.gameId = gameId;
@@ -185,40 +183,10 @@ public final class ModSearchQuery implements Query {
         return this;
     }
 
-    /**
-     * A zero based index of the first item to include in the response
-     * 
-     * @param  index
-     * @return
-     */
-    public ModSearchQuery index(final int index) {
-        this.index = index;
-        return this;
-    }
-
-    /**
-     * The number of items to include in the response
-     * 
-     * @param  pageSize
-     * @return
-     */
-    public ModSearchQuery pageSize(final int pageSize) {
-        this.pageSize = pageSize;
-        return this;
-    }
-
-    /**
-     * Paginate this query with the given {@code pagination}.
-     */
-    public ModSearchQuery paginated(PaginationQuery pagination) {
-        this.index = pagination.index;
-        this.pageSize = pagination.pageSize;
-        return this;
-    }
-
     @Override
     public Arguments toArgs() {
-        return Arguments.of("gameId", gameId)
+        return super.toArgs()
+                .put("gameId", gameId)
                 .put("classId", classId)
                 .put("categoryId", categoryId)
                 .put("gameVersion", encodeURL(gameVersion))
@@ -228,9 +196,7 @@ public final class ModSearchQuery implements Query {
                 .put("modLoaderTypes", (modLoaderTypes == null || modLoaderTypes.isEmpty()) ? null : "[" + modLoaderTypes.stream()
                         .map(type -> String.valueOf(type.ordinal())).collect(Collectors.joining(",")) + "]")
                 .put("gameVersionTypeId", gameVersionTypeId)
-                .put("slug", encodeURL(slug))
-                .put("index", index)
-                .put("pageSize", pageSize);
+                .put("slug", encodeURL(slug));
     }
 
     @Override

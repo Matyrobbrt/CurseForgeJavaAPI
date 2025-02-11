@@ -45,6 +45,7 @@ import io.github.matyrobbrt.curseforgeapi.request.Requests;
 import io.github.matyrobbrt.curseforgeapi.request.Response;
 import io.github.matyrobbrt.curseforgeapi.request.async.OfCompletableFutureAsyncRequest;
 import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.FileListQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.GetFuzzyMatchesQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
 import io.github.matyrobbrt.curseforgeapi.request.query.PaginationQuery;
@@ -90,23 +91,21 @@ public class AsyncRequestHelper implements IRequestHelper {
         return api.makeAsyncRequest(Requests.getModFiles(modId));
     }
 
-    @Override
     public AsyncRequest<Response<Iterator<AsyncRequest<File>>>> listModFiles(int modId) throws CurseForgeException {
-        return paginated(query -> Requests.getPaginatedModFiles(modId, null, query), Function.identity());
+        return listModFiles(modId, null);
+    }
+
+    @Override
+    public AsyncRequest<Response<Iterator<AsyncRequest<File>>>> listModFiles(int modId, @Nullable FileListQuery query) throws CurseForgeException {
+        return paginated(pg -> Requests.getPaginatedModFiles(modId, (query == null ? FileListQuery.of() : query).paginated(pg)), Function.identity());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public AsyncRequest<Response<List<File>>> getModFiles(int modId, @Nullable Integer gameVersionTypeId,
-        @Nullable PaginationQuery paginationQuery) throws CurseForgeException {
-        return api.makeAsyncRequest(Requests.getModFiles(modId, gameVersionTypeId, paginationQuery));
-    }
-
-    @Override
-    public AsyncRequest<Response<Iterator<AsyncRequest<File>>>> listModFiles(int modId, @Nullable Integer gameVersionTypeId) throws CurseForgeException {
-        return paginated(query -> Requests.getPaginatedModFiles(modId, gameVersionTypeId, query), Function.identity());
+    public AsyncRequest<Response<List<File>>> getModFiles(int modId, @Nullable FileListQuery query) throws CurseForgeException {
+        return api.makeAsyncRequest(Requests.getModFiles(modId, query));
     }
 
     /**
@@ -215,7 +214,7 @@ public class AsyncRequestHelper implements IRequestHelper {
 
     @Override
     public AsyncRequest<Response<Iterator<AsyncRequest<File>>>> listModFiles(Mod mod) throws CurseForgeException {
-        return paginated(query -> Requests.getPaginatedModFiles(mod.id(), null, query), Function.identity());
+        return paginated(query -> Requests.getPaginatedModFiles(mod.id(), FileListQuery.of().paginated(query)), Function.identity());
     }
 
     /**

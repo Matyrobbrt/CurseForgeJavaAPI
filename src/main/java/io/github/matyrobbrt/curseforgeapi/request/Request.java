@@ -27,15 +27,15 @@
 
 package io.github.matyrobbrt.curseforgeapi.request;
 
-import java.lang.reflect.Type;
-import java.util.function.BiFunction;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import io.github.matyrobbrt.curseforgeapi.annotation.Nullable;
 import io.github.matyrobbrt.curseforgeapi.annotation.ParametersAreNonnullByDefault;
+
+import java.lang.reflect.Type;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @ParametersAreNonnullByDefault
 public class Request<R> extends GenericRequest {
@@ -70,6 +70,10 @@ public class Request<R> extends GenericRequest {
 
     public R decodeResponse(Gson gson, JsonObject response) {
         return responseDecoder.apply(gson, response);
+    }
+
+    public <T> Request<T> map(Function<R, T> mapper) {
+        return new Request<>(endpoint(), method(), body(), (gson, jsonObject) -> mapper.apply(decodeResponse(gson, jsonObject)));
     }
 
     @Nullable
