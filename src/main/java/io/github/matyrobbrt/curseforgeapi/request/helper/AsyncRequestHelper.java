@@ -306,16 +306,21 @@ public class AsyncRequestHelper implements IRequestHelper {
 
                 private synchronized void requery() {
                     try {
-                        final var res = mr(requester.apply(PaginationQuery.of(currentIndex.get() + 1, 50)));
-                        res.map(Response::orElseThrow).queue(data -> {
-                            final var values = collector.apply(data.data());
-                            for (int i = data.pagination().index(); i < data.pagination().index() + data.pagination().resultCount(); i++) {
-                                if (i < requests.size()) {
-                                    requests.get(i).future().complete(values.get(i - data.pagination().index()));
-                                }
-                            }
-                            currentResponse.set(values);
-                        });
+                        mr(requester.apply(PaginationQuery.of(currentIndex.get() + 1, 50)))
+                                .queue(res -> {
+                                    if (res.isEmpty()) {
+                                        currentResponse.set(List.of());
+                                    } else {
+                                        var data = res.orElseThrow();
+                                        final var values = collector.apply(data.data());
+                                        for (int i = data.pagination().index(); i < data.pagination().index() + data.pagination().resultCount(); i++) {
+                                            if (i < requests.size()) {
+                                                requests.get(i).future().complete(values.get(i - data.pagination().index()));
+                                            }
+                                        }
+                                        currentResponse.set(values);
+                                    }
+                                });
                         currentResponse.set(null);
                         currentListIndex.set(-1);
                     } catch (CurseForgeException exception) {

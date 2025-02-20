@@ -292,9 +292,15 @@ public class RequestHelper implements IRequestHelper {
 
             private synchronized void requery() {
                 try {
-                    final var res = mr(requester.apply(PaginationQuery.of(currentIndex.get() + 1, 50))).orElseThrow();
-                    size.set(res.pagination().totalCount());
-                    currentResponse = collector.apply(res.data());
+                    final var optionalRes = mr(requester.apply(PaginationQuery.of(currentIndex.get() + 1, 50)));
+                    if (optionalRes.isEmpty()) {
+                        size.set(0);
+                        currentResponse = List.of();
+                    } else {
+                        final var res = optionalRes.orElseThrow();
+                        size.set(res.pagination().totalCount());
+                        currentResponse = collector.apply(res.data());
+                    }
                     currentListIndex.set(-1);
                 } catch (CurseForgeException exception) {
                     throw new RuntimeException(exception);
