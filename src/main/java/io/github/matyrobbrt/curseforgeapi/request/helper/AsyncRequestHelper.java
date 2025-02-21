@@ -279,7 +279,7 @@ public class AsyncRequestHelper implements IRequestHelper {
 
                 @Override
                 public boolean hasNext() {
-                    return currentIndex.get() + 1 < size.get();
+                    return currentIndex.get() + 1 < Math.min(size.get(), 10_000); // Hard CF API limit, at least for now
                 }
 
                 @Override

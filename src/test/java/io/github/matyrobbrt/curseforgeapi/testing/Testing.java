@@ -27,6 +27,31 @@
 
 package io.github.matyrobbrt.curseforgeapi.testing;
 
+import io.github.cdimascio.dotenv.Dotenv;
+import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
+import io.github.matyrobbrt.curseforgeapi.request.Requests;
+import io.github.matyrobbrt.curseforgeapi.request.Response;
+import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.FileListQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
+import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery.SortField;
+import io.github.matyrobbrt.curseforgeapi.request.uploadapi.UploadApiRequests;
+import io.github.matyrobbrt.curseforgeapi.request.uploadapi.UploadQuery;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.FileRelationType;
+import io.github.matyrobbrt.curseforgeapi.schemas.file.FileReleaseType;
+import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintsMatchesResult;
+import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
+import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
+import io.github.matyrobbrt.curseforgeapi.util.Constants;
+import io.github.matyrobbrt.curseforgeapi.util.Constants.GameIDs;
+import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
+import io.github.matyrobbrt.curseforgeapi.util.Pair;
+import io.github.matyrobbrt.curseforgeapi.util.Utils;
+import org.assertj.core.api.Condition;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,34 +59,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import io.github.matyrobbrt.curseforgeapi.schemas.file.File;
-import io.github.matyrobbrt.curseforgeapi.schemas.mod.ModLoaderType;
-import org.assertj.core.api.Condition;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import io.github.cdimascio.dotenv.Dotenv;
-import io.github.matyrobbrt.curseforgeapi.CurseForgeAPI;
-import io.github.matyrobbrt.curseforgeapi.request.Requests;
-import io.github.matyrobbrt.curseforgeapi.request.Response;
-import io.github.matyrobbrt.curseforgeapi.request.query.FeaturedModsQuery;
-import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery;
-import io.github.matyrobbrt.curseforgeapi.request.query.ModSearchQuery.SortField;
-import io.github.matyrobbrt.curseforgeapi.request.uploadapi.UploadApiRequests;
-import io.github.matyrobbrt.curseforgeapi.request.uploadapi.UploadQuery;
-import io.github.matyrobbrt.curseforgeapi.schemas.file.FileRelationType;
-import io.github.matyrobbrt.curseforgeapi.schemas.file.FileReleaseType;
-import io.github.matyrobbrt.curseforgeapi.schemas.fingerprint.FingerprintsMatchesResult;
-import io.github.matyrobbrt.curseforgeapi.schemas.game.Game;
-import io.github.matyrobbrt.curseforgeapi.util.Constants;
-import io.github.matyrobbrt.curseforgeapi.util.Constants.GameIDs;
-import io.github.matyrobbrt.curseforgeapi.util.CurseForgeException;
-import io.github.matyrobbrt.curseforgeapi.util.Pair;
-import io.github.matyrobbrt.curseforgeapi.util.Utils;
-
 import static io.github.matyrobbrt.curseforgeapi.request.Requests.*;
-import static io.github.matyrobbrt.curseforgeapi.testing.Assertions.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Most tests made in this class use the <a href=
@@ -126,7 +125,7 @@ final class Testing {
         final var res = helper.listModFiles(JEI_MOD_ID);
         assertThat(res).isPresent();
 
-        final var expected = CF_API.makeRequest(Requests.getPaginatedModFiles(JEI_MOD_ID, null, null));
+        final var expected = CF_API.makeRequest(Requests.getPaginatedModFiles(JEI_MOD_ID, FileListQuery.of()));
         assertThat(expected).isPresent();
 
         List<File> files = new ArrayList<>();
@@ -400,5 +399,4 @@ final class Testing {
                 .addRelation("mekanism", FileRelationType.REQUIRED_DEPENDENCY), Path.of("test.jar")));
         assertThat(response).isPresent();
     }
-
 }
