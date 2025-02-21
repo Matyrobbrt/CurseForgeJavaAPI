@@ -59,8 +59,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static io.github.matyrobbrt.curseforgeapi.testing.Assertions.*;
 import static io.github.matyrobbrt.curseforgeapi.request.Requests.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Most tests made in this class use the <a href=
