@@ -27,6 +27,7 @@
 
 package io.github.matyrobbrt.curseforgeapi.request.helper;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -259,7 +260,16 @@ public class RequestHelper implements IRequestHelper {
         if (baseResponse.isEmpty()) {
             return Response.empty(baseResponse.getStatusCode());
         }
-        final var paginationData = baseResponse.get().pagination();
+        
+        var br = baseResponse.get();
+        var collected = collector.apply(br.data());
+        // If we have no data, we always return an empty iterator
+        // the API might be lying in the total count that it has more
+        if (collected.isEmpty()) {
+            return Response.of(Collections.emptyIterator(), baseResponse.getStatusCode());
+        }
+        
+        final var paginationData = br.pagination();
 
         return Response.of(new Iterator<>() {
             private final AtomicInteger currentIndex = new AtomicInteger(-1);
@@ -268,7 +278,7 @@ public class RequestHelper implements IRequestHelper {
             private final AtomicInteger currentListIndex = new AtomicInteger(-1);
 
             {
-                currentResponse = collector.apply(baseResponse.get().data());
+                currentResponse = collector.apply(br.data());
                 size.set(paginationData.totalCount());
             }
 
