@@ -1,15 +1,7 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0"
-    }
-}
 plugins {
     id 'java-library'
     id 'org.cadixdev.licenser' version '0.6.1'
-    id 'eclipse'
+    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -64,7 +56,6 @@ allprojects {
     
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
-    apply plugin: 'io.codearte.nexus-staging'
     publishing {
         publications{
             mavenJava(MavenPublication) {
@@ -94,26 +85,17 @@ allprojects {
                 }
             }
         }
-        repositories {
-            maven {
-                name = "OSSRH"
-                url = project.hasProperty("snapshot") ?
-                        "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-                        : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-                credentials {
-                    username = findProperty("ossrhUser") ? ossrhUser : ""
-                    password = findProperty("ossrhPassword") ? ossrhPassword : ""
-                }
-            }
-        }
     }
     signing {
         sign publishing.publications.mavenJava
     }
-    nexusStaging {
-        serverUrl = "https://s01.oss.sonatype.org/service/local/"
-        username = findProperty("ossrhUser") ? ossrhUser : ""
-        password = findProperty("ossrhPassword") ? ossrhPassword : ""
+    nexusPublishing {
+        repositories {
+            // see https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#configuration
+            sonatype {
+                it.nexusUrl.set(URI.create('https://ossrh-staging-api.central.sonatype.com/service/local/'))
+            }
+        }
     }
     if (project.hasProperty("close")) {
         tasks.publish.finalizedBy closeAndReleaseRepository

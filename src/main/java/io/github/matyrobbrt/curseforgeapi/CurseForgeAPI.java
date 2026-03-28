@@ -37,6 +37,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -304,6 +305,9 @@ public class CurseForgeAPI {
     public Response<JsonObject> makeGenericRequest(GenericRequest genericRequest) throws CurseForgeException {
         if (apiKey == null)
             throw new CurseForgeException("Cannot make requests with a null API key!");
+
+        String responseBody = "null";
+
         int statusCode = 0;
         try {
             final URL target = new URL(REQUEST_TARGET + genericRequest.endpoint());
@@ -320,18 +324,25 @@ public class CurseForgeAPI {
             }).build();
             final var response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             statusCode = response.statusCode();
+            responseBody = response.body();
             if (statusCode == StatusCodes.NOT_FOUND || statusCode == StatusCodes.API_UNAVAILABLE || statusCode == StatusCodes.GATEWAY_TIMEOUT) {
                 return Response.empty(statusCode);
             }
-            return Response.ofNullableAndStatusCode(gson.fromJson(response.body(), JsonObject.class), statusCode);
+
+            var asJson = gson.fromJson(response.body(), JsonElement.class);
+            if (!asJson.isJsonObject()) {
+                throw new CurseForgeException("Expected a JSON Object but request " + genericRequest + " returned \"" + response.body() + "\", with status code " + statusCode);
+            }
+
+            return Response.ofNullableAndStatusCode(asJson.getAsJsonObject(), statusCode);
         } catch (InterruptedException ine) {
             logger.error(
                 "InterruptedException while awaiting CurseForge response, which returned with the status code: ", ine);
             Thread.currentThread().interrupt();
             return Response.empty(statusCode);
         } catch (Exception e) {
-            logger.info("Status code was {}", statusCode);
-            throw new CurseForgeException(e);
+            if (e instanceof CurseForgeException ex) throw ex;
+            throw new CurseForgeException(e + " (status code " + statusCode + ", request " + genericRequest + ", response \"" + responseBody + "\"" + ")", e);
         }
     }
 
@@ -380,12 +391,16 @@ public class CurseForgeAPI {
                 return r;
             }).build();
             return new OfHttpResponseAsyncRequest<>(httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString())
-                .thenApply(response -> {
+                .<Response<JsonObject>>thenCompose(response -> {
                     if (response.statusCode() == StatusCodes.NOT_FOUND || response.statusCode() == StatusCodes.API_UNAVAILABLE || response.statusCode() == StatusCodes.GATEWAY_TIMEOUT) {
-                        return Response.empty(response.statusCode());
+                        return CompletableFuture.completedStage(Response.empty(response.statusCode()));
                     } else {
-                        return Response
-                         .ofNullableAndStatusCode(gson.fromJson(response.body(), JsonObject.class), response.statusCode());
+                        var asJson = gson.fromJson(response.body(), JsonElement.class);
+                        if (!asJson.isJsonObject()) {
+                            return CompletableFuture.failedStage(new CurseForgeException("Expected a JSON Object but request " + genericRequest + " returned \"" + response.body() + "\", with status code " + response.statusCode()));
+                        }
+
+                        return CompletableFuture.completedStage(Response.ofNullableAndStatusCode(asJson.getAsJsonObject(), response.statusCode()));
                     }
                 }));
         } catch (Exception e) {
@@ -407,7 +422,7 @@ public class CurseForgeAPI {
      * @param  request             the request to send
      * @return                     the response of the request, deserialized from a
      *                             {@link JsonObject} using
-     *                             {@link UploadApiRequest#decodeResponse(WrappedJson)},
+     *                             {@link UploadApiRequest#responseDecoder()},
      *                             if present
      * @throws CurseForgeException
      */
@@ -459,7 +474,7 @@ public class CurseForgeAPI {
      * @return                     the async request, which will be sent when
      *                             {@link AsyncRequest#queue} is called. The result
      *                             is deserialized from a {@link JsonObject} using
-     *                             {@link UploadApiRequest#decodeResponse(WrappedJson)},
+     *                             {@link UploadApiRequest#responseDecoder()},
      *                             if present
      * @throws CurseForgeException
      */
@@ -584,9 +599,9 @@ public class CurseForgeAPI {
          * <br>
          * By default, this is set to
          * {@link io.github.matyrobbrt.curseforgeapi.CurseForgeAPI#DEFAULT_HTTP_CLIENT_FACTORY}.
-         * 
-         * @param  logger the logger
-         * @return        the builder instance, for chaining purposes
+         *
+         * @param httpClient the http client
+         * @return the builder instance, for chaining purposes
          */
         public Builder httpClient(HttpClient httpClient) {
             this.httpClient = () -> Objects.requireNonNull(httpClient,

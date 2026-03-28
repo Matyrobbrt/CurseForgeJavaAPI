@@ -38,6 +38,10 @@ public final class CurseForgeException extends Exception {
     public CurseForgeException(String message) {
         super(message);
     }
+
+    public CurseForgeException(String message, Throwable t) {
+        super(message, t);
+    }
     
     public static final class Runtime extends RuntimeException {
 

@@ -59,4 +59,9 @@ public class GenericRequest {
     public JsonElement body() {
         return body;
     }
+
+    @Override
+    public String toString() {
+        return endpoint + " (" + method + ")" + (body == null ? "" : (" {" + body + "}"));
+    }
 }
